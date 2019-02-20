@@ -1,8 +1,6 @@
 from django.contrib import admin
-from django.http import HttpResponse
-# Create your views here.
+from .models import Device, THINGER_API, Resources
 
-def home(request):
-    return HttpResponse('<h1>Vinus Home Page</h1>')
-def about(request):
-    return HttpResponse('<h1>About Vinus</h1>')
+admin.site.register(Device)
+admin.site.register(THINGER_API)
+admin.site.register(Resources)
