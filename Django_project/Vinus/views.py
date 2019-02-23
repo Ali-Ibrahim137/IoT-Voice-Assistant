@@ -31,3 +31,6 @@ class DeviceCreateView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.user = self.request.user
         return super().form_valid(form)
+class THINGER_APICreateView(LoginRequiredMixin, CreateView):
+    model = THINGER_API
+    fields = ['thinger_api_name', 'device']
