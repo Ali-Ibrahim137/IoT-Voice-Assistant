@@ -24,5 +24,5 @@ class DeviceCreateView(LoginRequiredMixin, CreateView):
     model = Device
     fields = ['device_name', 'thinger_username', 'token', 'is_connected']
     def form_valid(self, form):
-        form.instance.userr = self.request.user
+        form.instance.user = self.request.user
         return super().form_valid(form)
