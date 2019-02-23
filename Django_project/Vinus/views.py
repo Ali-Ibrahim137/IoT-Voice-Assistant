@@ -10,14 +10,19 @@ from django.views.generic import (
 from .models import Device, THINGER_API, Resources
 
 def home(request):
-    return render(request, 'Vinus/home.html')
+    if not request.user.is_authenticated:
+        return render(request, 'Vinus/home.html')
+    context = {
+        'object_list': Device.objects.filter(user = request.user)
+    }
+    return render(request, 'Vinus/home.html', context)
 
 def about(request):
     return render(request, 'Vinus/about.html', {'title':'about'})
 
 def devices(request):
     context = {
-        'object_list': Device.objects.filter(userr = request.user)
+        'object_list': Device.objects.filter(user = request.user)
     }
     return render (request, 'Vinus/device_list.html', context)
 class DeviceCreateView(LoginRequiredMixin, CreateView):

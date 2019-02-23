@@ -1,4 +1,28 @@
 {% extends "Vinus/base.html" %}
 {% block content%}
-  <h1>Home page content will be added later</h1>
+{% if user.is_authenticated %}
+<div class="content-section">
+    <fieldset class="form-group">
+        <legend class="border-bottom mb-4">Devices</legend>
+    </fieldset>
+    {% for object in object_list  %}
+    <div class="content-section">
+        <div class="media-body" class="form-group">
+          <div>Device: <a href="#">{{ object.device_name }}</a></div>
+          <div>User: {{ object.thinger_username }}</div>
+          <div>Token: {{ object.token }}</div>
+        </div>
+    </div>
+    {% empty %}
+    <h1>There are no devices added</h1>
+    <div class="border-top pt-3">
+        <small class="text-muted">
+            <a class="ml-2" href="{% url 'profile' %}">Add Devices</a>
+        </small>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+  <h1>Log In to check your devices</h1>
+{% endif %}
 {%endblock content%}
