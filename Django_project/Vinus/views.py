@@ -34,3 +34,6 @@ class DeviceCreateView(LoginRequiredMixin, CreateView):
 class THINGER_APICreateView(LoginRequiredMixin, CreateView):
     model = THINGER_API
     fields = ['thinger_api_name', 'device']
+class ResourcesCreateView(LoginRequiredMixin, CreateView):
+    model = Resources
+    fields = ['resources_name', 'type', 'thinger_api']
