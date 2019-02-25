@@ -56,10 +56,53 @@ class DeviceUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         if self.request.user == Device.user:
             return True
         return False
-#/////////////////////
+
+class DeviceDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Device
+    success_url = '/'
+
+    def test_func(self):
+        Device = self.get_object()
+        if self.request.user == Device.user:
+            return True
+        return False
+#///////////////////// end of device
+class THINGER_APIDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    model = THINGER_API
+    def test_func(self):
+        THINGER_API = self.get_object()
+        if self.request.user == THINGER_API.device.user:
+            return True
+        return False
+
 class THINGER_APICreateView(LoginRequiredMixin, CreateView):
     model = THINGER_API
     fields = ['thinger_api_name', 'device']
+
+class THINGER_APIUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = THINGER_API
+    fields = ['thinger_api_name', 'device']
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+    def test_func(self):
+        THINGER_API = self.get_object()
+        if self.request.user == THINGER_API.device.user:
+            return True
+        return False
+
+class THINGER_APIDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = THINGER_API
+    success_url = '/'
+
+    def test_func(self):
+        THINGER_API = self.get_object()
+        if self.request.user == THINGER_API.device.user:
+            return True
+        return False
+#/////////////////////// end of Api
 
 
 class ResourcesCreateView(LoginRequiredMixin, CreateView):

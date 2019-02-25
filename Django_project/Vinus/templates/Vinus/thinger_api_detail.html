@@ -1,0 +1,15 @@
+{% extends "Vinus/base.html" %}
+{% block content%}
+{{ my_model.slug_field_name }}
+  <div class="content-section">
+      <div class="content-section">
+          <div class="media-body" class="form-group">
+            <div>Device: {{ object.thinger_api_name }}</div>
+            <div>User: {{ object.device}}</div>
+          </div>
+      </div>
+  </div>
+  {% for resource in resources %}
+    <h4>{{ resources.resources_name }}</h4>
+  {% endfor %}
+{%endblock content%}
