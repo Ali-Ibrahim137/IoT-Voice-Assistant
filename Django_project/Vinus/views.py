@@ -17,16 +17,12 @@ def home(request):
     }
     return render(request, 'Vinus/home.html', context)
 
+
+
 def about(request):
-    return render(request, 'Vinus/about.html', {'title':'about'})
+    return render(request, 'Vinus/about.html')
 
-def devices(request):
-    context = {
-        'object_list': Device.objects.filter(user = request.user)
-    }
-    return render (request, 'Vinus/device_list.html', context)
-
-#////////////////////
+################################################################################
 class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Device
     def test_func(self):
@@ -56,12 +52,17 @@ class DeviceUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         if self.request.user == Device.user:
             return True
         return False
-#/////////////////////
+################################################################################
 class THINGER_APICreateView(LoginRequiredMixin, CreateView):
     model = THINGER_API
     fields = ['thinger_api_name', 'device']
 
 
+
+
+
+
+################################################################################
 class ResourcesCreateView(LoginRequiredMixin, CreateView):
     model = Resources
     fields = ['resources_name', 'type', 'thinger_api']
