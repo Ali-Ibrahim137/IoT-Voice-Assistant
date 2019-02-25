@@ -10,6 +10,9 @@ from .views import (
     THINGER_APIUpdateView,
     THINGER_APIDeleteView,
     ResourcesCreateView,
+    ResourcesDetailView,
+    ResourcesUpdateView,
+    ResourcesDeleteView,
 )
 urlpatterns = [
     path('',views.home, name='Vinus-home' ),
@@ -22,5 +25,8 @@ urlpatterns = [
     path('api/<int:pk>/update/', THINGER_APIUpdateView.as_view(), name='api-update'),
     path('api/<int:pk>/delete/', THINGER_APIDeleteView.as_view(), name='api-delete'),
     path('res/new/', ResourcesCreateView.as_view(), name='res-create'),
+    path('res/<int:pk>/', ResourcesDetailView.as_view(), name='res-detail'),
+    path('res/<int:pk>/update/', ResourcesUpdateView.as_view(), name='res-update'),
+    path('res/<int:pk>/delete/', ResourcesDeleteView.as_view(), name='res-delete'),
     path('about/',views.about, name='Vinus-about' ),
 ]

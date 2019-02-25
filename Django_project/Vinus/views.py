@@ -100,10 +100,38 @@ class THINGER_APIDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
             return True
         return False
 #/////////////////////// end of Api
-
-
-
 ################################################################################
+class ResourcesDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    model = Resources
+    def test_func(self):
+        Resources = self.get_object()
+        if self.request.user == Resources.thinger_api.device.user:
+            return True
+        return False
+
 class ResourcesCreateView(LoginRequiredMixin, CreateView):
     model = Resources
     fields = ['resources_name', 'type', 'thinger_api']
+
+class ResourcesUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Resources
+    fields = ['resources_name', 'type', 'thinger_api']
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+    def test_func(self):
+        Resources = self.get_object()
+        if self.request.user == Resources.thinger_api.device.user:
+            return True
+        return False
+
+class ResourcesDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
+    model = Resources
+    success_url = '/'
+
+    def test_func(self):
+        Resources = self.get_object()
+        if self.request.user == Resources.thinger_api.device.user:
+            return True
+        return False
