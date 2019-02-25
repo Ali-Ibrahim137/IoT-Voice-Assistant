@@ -26,10 +26,16 @@ def devices(request):
     }
     return render (request, 'Vinus/device_list.html', context)
 
-class DeviceDetailView(DetailView):
-    model = Device
-
 #////////////////////
+class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
+    model = Device
+    def test_func(self):
+        Device = self.get_object()
+        if self.request.user == Device.user:
+            return True
+        return False
+
+
 class DeviceCreateView(LoginRequiredMixin, CreateView):
     model = Device
     fields = ['device_name', 'thinger_username', 'token', 'is_connected']

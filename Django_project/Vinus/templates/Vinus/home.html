@@ -8,7 +8,7 @@
     {% for object in object_list  %}
     <div class="content-section">
         <div class="media-body" class="form-group">
-          <div>Device: <a href="#">{{ object.device_name }}</a></div>
+          <div>Device: <a href="{% url 'device-detail' object.id %}">{{ object.device_name }}</a></div>
           <div>User: {{ object.thinger_username }}</div>
           <div>Token: {{ object.token }}</div>
         </div>
