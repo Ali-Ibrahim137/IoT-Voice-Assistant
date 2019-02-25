@@ -25,15 +25,23 @@ def devices(request):
         'object_list': Device.objects.filter(user = request.user)
     }
     return render (request, 'Vinus/device_list.html', context)
+
+class DeviceDetailView(DetailView):
+    model = Device
+
+
 class DeviceCreateView(LoginRequiredMixin, CreateView):
     model = Device
     fields = ['device_name', 'thinger_username', 'token', 'is_connected']
     def form_valid(self, form):
         form.instance.user = self.request.user
         return super().form_valid(form)
+
 class THINGER_APICreateView(LoginRequiredMixin, CreateView):
     model = THINGER_API
     fields = ['thinger_api_name', 'device']
+
+
 class ResourcesCreateView(LoginRequiredMixin, CreateView):
     model = Resources
     fields = ['resources_name', 'type', 'thinger_api']
