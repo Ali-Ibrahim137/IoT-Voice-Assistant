@@ -13,6 +13,8 @@ from .views import (
     ResourcesDetailView,
     ResourcesUpdateView,
     ResourcesDeleteView,
+    DeviceApiListView,
+    ApiResListView,
 )
 urlpatterns = [
     path('',views.home, name='Vinus-home' ),
@@ -28,5 +30,8 @@ urlpatterns = [
     path('res/<int:pk>/', ResourcesDetailView.as_view(), name='res-detail'),
     path('res/<int:pk>/update/', ResourcesUpdateView.as_view(), name='res-update'),
     path('res/<int:pk>/delete/', ResourcesDeleteView.as_view(), name='res-delete'),
+    path('device/<str:device_name>/', DeviceApiListView.as_view(), name='device-api-list'),
+    path('api/<str:thinger_api_name>/', ApiResListView.as_view(), name='api-res-list'),
     path('about/',views.about, name='Vinus-about' ),
+
 ]

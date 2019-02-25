@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.views.generic import (
     ListView,
@@ -30,7 +30,6 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
         if self.request.user == self.get_object().user:
             return True
         return False
-
 
 
 class DeviceCreateView(LoginRequiredMixin, CreateView):
@@ -135,3 +134,17 @@ class ResourcesDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         if self.request.user == Resources.thinger_api.device.user:
             return True
         return False
+#//////////////////////////
+class DeviceApiListView(ListView):
+    model = Device
+    template_name='Vinus/device-api-list.html'
+    def get_queryset(self):
+        device1=get_object_or_404(Device, device_name=self.kwargs.get('device_name'))
+        return THINGER_API.objects.filter(device=device1)
+
+class ApiResListView(ListView):
+    model = THINGER_API
+    template_name='Vinus/api-res-list.html'
+    def get_queryset(self):
+        api1=get_object_or_404(THINGER_API, thinger_api_name=self.kwargs.get('thinger_api_name'))
+        return Resources.objects.filter(thinger_api=api1)

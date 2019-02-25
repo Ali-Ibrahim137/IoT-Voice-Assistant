@@ -1,0 +1,6 @@
+{% extends "Vinus/base.html" %}
+{% block content %}
+  {% for object in object_list %}
+    {{object.thinger_api_name}}
+  {% endfor %}
+{% endblock content %}
