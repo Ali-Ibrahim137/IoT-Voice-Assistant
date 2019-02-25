@@ -14,6 +14,10 @@
                 Device is not connected
               {% endif %}
             </div>
+            <div>
+              <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'device-update' object.id %}">Update</a>
+              <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'device-delete' object.id %}">Delete</a>
+            </div>
           </div>
       </div>
   </div>
