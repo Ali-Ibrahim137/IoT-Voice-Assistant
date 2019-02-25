@@ -7,6 +7,13 @@
             <div>Device: {{ object.device_name }}</div>
             <div>User: {{ object.thinger_username }}</div>
             <div>Token: {{ object.token }}</div>
+            <div>
+              {% if object.is_connected %}
+                Device is connected
+              {% else %}
+                Device is not connected
+              {% endif %}
+            </div>
           </div>
       </div>
   </div>
