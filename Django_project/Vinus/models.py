@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.urls import reverse
 
 class Device(models.Model):
     device_name = models.CharField(max_length=100)
@@ -10,6 +11,9 @@ class Device(models.Model):
 
     def __str__(self):
         return self.device_name
+
+    def get_absolute_url(self):
+        return reverse('device-detail', kwargs={'pk': self.pk})
 
 class THINGER_API(models.Model):
     thinger_api_name = models.CharField(max_length=100)
