@@ -25,11 +25,12 @@ def about(request):
 ################################################################################
 class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Device
+
     def test_func(self):
-        Device = self.get_object()
-        if self.request.user == Device.user:
+        if self.request.user == self.get_object().user:
             return True
         return False
+
 
 
 class DeviceCreateView(LoginRequiredMixin, CreateView):
@@ -56,9 +57,6 @@ class DeviceUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 class THINGER_APICreateView(LoginRequiredMixin, CreateView):
     model = THINGER_API
     fields = ['thinger_api_name', 'device']
-
-
-
 
 
 
