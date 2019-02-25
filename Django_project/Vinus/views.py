@@ -29,7 +29,7 @@ def devices(request):
 class DeviceDetailView(DetailView):
     model = Device
 
-
+#////////////////////
 class DeviceCreateView(LoginRequiredMixin, CreateView):
     model = Device
     fields = ['device_name', 'thinger_username', 'token', 'is_connected']
@@ -37,6 +37,20 @@ class DeviceCreateView(LoginRequiredMixin, CreateView):
         form.instance.user = self.request.user
         return super().form_valid(form)
 
+class DeviceUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
+    model = Device
+    fields = ['device_name', 'thinger_username', 'token', 'is_connected']
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
+
+    def test_func(self):
+        Device = self.get_object()
+        if self.request.user == Device.user:
+            return True
+        return False
+#/////////////////////
 class THINGER_APICreateView(LoginRequiredMixin, CreateView):
     model = THINGER_API
     fields = ['thinger_api_name', 'device']
