@@ -29,7 +29,7 @@ def about(request):
 # DeviceDetailView:
 # url: /device/<int:pk>/detail
 # template_name = 'device_detail.html'
-# contain device info, without the apis
+# Contain device info, without the apis
 class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Device
     def test_func(self):
@@ -101,7 +101,7 @@ class DeviceDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 # DeviceApiListView:
 # url: /device/<str:device_name>
 # template_name = 'device-api-list.html.html'
-# Deletes existing device
+# Lists all the APIs for some device
 class DeviceApiListView(ListView):
     model = Device
     template_name='Vinus/device-api-list.html'
@@ -114,6 +114,10 @@ class DeviceApiListView(ListView):
 ################################################################################
 ######################## THINGER_API Views starts here #########################
 
+# THINGER_APIDetailView:
+# url: /api/<int:pk>/detail
+# template_name = 'thinger_api_detail.html'
+# Contain API info, without the resources
 class THINGER_APIDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = THINGER_API
     def test_func(self):
@@ -122,17 +126,22 @@ class THINGER_APIDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView)
             return True
         return False
 
+
+# THINGER_APICreateView:
+# url: /device/new
+# template_name = 'thinger_api__form.html'
+# Creates new API
 class THINGER_APICreateView(LoginRequiredMixin, CreateView):
     model = THINGER_API
     fields = ['thinger_api_name', 'device']
 
+# THINGER_APIUpdateView:
+# url: api/<int:pk>/update
+# template_name = 'thinger_api_form.html'
+# Updates existing api
 class THINGER_APIUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = THINGER_API
     fields = ['thinger_api_name', 'device']
-
-    def form_valid(self, form):
-        form.instance.user = self.request.user
-        return super().form_valid(form)
 
     def test_func(self):
         THINGER_API = self.get_object()
@@ -140,6 +149,10 @@ class THINGER_APIUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView)
             return True
         return False
 
+# THINGER_APIDeleteView:
+# url: /api/<int:pk>/delete
+# template_name = 'thinger_api_confirm_delete.html'
+# Deletes existing api
 class THINGER_APIDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = THINGER_API
     success_url = '/'
@@ -149,6 +162,18 @@ class THINGER_APIDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
         if self.request.user == THINGER_API.device.user:
             return True
         return False
+
+# ApiResListView:
+# url: /api/<str:thinger_api_name>
+# template_name = 'api-res-list.html.html'
+# Lists all the Resources for some API
+class ApiResListView(ListView):
+    model = THINGER_API
+    template_name='Vinus/api-res-list.html'
+    def get_queryset(self):
+        thinger_api=get_object_or_404(THINGER_API, thinger_api_name=self.kwargs.get('thinger_api_name'))
+        return Resources.objects.filter(thinger_api = thinger_api)
+
 #/////////////////////// end of Api
 ################################################################################
 class ResourcesDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
@@ -186,10 +211,3 @@ class ResourcesDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
             return True
         return False
 #//////////////////////////
-
-class ApiResListView(ListView):
-    model = THINGER_API
-    template_name='Vinus/api-res-list.html'
-    def get_queryset(self):
-        api1=get_object_or_404(THINGER_API, thinger_api_name=self.kwargs.get('thinger_api_name'))
-        return Resources.objects.filter(thinger_api=api1)

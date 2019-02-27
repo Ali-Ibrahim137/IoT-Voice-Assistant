@@ -46,6 +46,8 @@
               <div class="navbar-nav">
                 {% if user.is_authenticated %}
                   <a class="nav-item nav-link" href="{% url 'device-create' %}">New Device</a>
+                  <a class="nav-item nav-link" href="{% url 'api-create' %}">New API</a>
+                  <a class="nav-item nav-link" href="{% url 'res-create' %}">New Resource</a>
                   <a class="nav-item nav-link" href="{% url 'profile'%}">{{ user.username }}</a>
                   <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
                 {% else %}

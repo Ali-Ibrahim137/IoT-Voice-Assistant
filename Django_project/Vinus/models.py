@@ -18,6 +18,7 @@ class Device(models.Model):
     class Meta:
         unique_together = ('device_name', 'user')
 
+
 class THINGER_API(models.Model):
     thinger_api_name = models.CharField(max_length=100)
     device = models.ForeignKey(Device, on_delete = models.CASCADE, default=True)
@@ -27,15 +28,28 @@ class THINGER_API(models.Model):
     def get_absolute_url(self):
         return reverse('api-detail', kwargs={'pk': self.pk})
 
+    class Meta:
+        unique_together = ('device', 'thinger_api_name')
+
+
 class Resources(models.Model):
     resources_name = models.CharField(max_length=100)
-    type = models.IntegerField()
+    choices = (
+        (1, 'Output Resources'),
+        (2, 'Input Resources'),
+        (3, 'Input/Output Resources'),
+        (4, 'Resources without parameters'),
+    )
+    type = models.IntegerField(
+        choices=choices,
+        default=1,
+    )
     thinger_api = models.ForeignKey(THINGER_API, on_delete = models.CASCADE, default=True)
     def __str__(self):
         return self.resources_name
     def get_absolute_url(self):
         return reverse('res-detail', kwargs={'pk': self.pk})
-    # 1 in
-    # 2 out
-    # 3 in_out
-    # 4 null
+    # 1 Output Resources
+    # 2 Input Resources
+    # 3 Input/Output Resources
+    # 4 Resources without parameters
