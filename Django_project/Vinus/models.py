@@ -15,6 +15,9 @@ class Device(models.Model):
     def get_absolute_url(self):
         return reverse('device-detail', kwargs={'pk': self.pk})
 
+    class Meta:
+        unique_together = ('device_name', 'user')
+
 class THINGER_API(models.Model):
     thinger_api_name = models.CharField(max_length=100)
     device = models.ForeignKey(Device, on_delete = models.CASCADE, default=True)

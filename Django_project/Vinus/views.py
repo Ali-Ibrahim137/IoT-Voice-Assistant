@@ -1,5 +1,8 @@
-from django.shortcuts import render, get_object_or_404
+from django.contrib import messages
+from django.shortcuts import render, get_object_or_404,  redirect
+from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from .models import Device, THINGER_API, Resources
 from django.views.generic import (
     ListView,
     DetailView,
@@ -7,8 +10,8 @@ from django.views.generic import (
     UpdateView,
     DeleteView
 )
-from .models import Device, THINGER_API, Resources
-
+################################################################################
+# home page, contains devices for logged In user
 def home(request):
     if not request.user.is_authenticated:
         return render(request, 'Vinus/home.html')
@@ -17,12 +20,16 @@ def home(request):
     }
     return render(request, 'Vinus/home.html', context)
 
-
-
+# about page
 def about(request):
     return render(request, 'Vinus/about.html')
 
 ################################################################################
+########################### Devices Views start here ###########################
+
+# DeviceDetailView:
+# url: /device/<int:pk>/detail
+# contain device info, without the apis
 class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Device
 
@@ -31,21 +38,39 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             return True
         return False
 
-
+# DeviceCreateView:
+# url: /device/new
+# Creates new device
 class DeviceCreateView(LoginRequiredMixin, CreateView):
     model = Device
-    fields = ['device_name', 'thinger_username', 'token', 'is_connected']
+    fields = ['device_name', 'thinger_username', 'token']
+
     def form_valid(self, form):
         form.instance.user = self.request.user
-        return super().form_valid(form)
+        form.instance.is_connected = False      # TODO: get this vlue from the Thinger.io server
+        devices = Device.objects.filter(device_name =form.instance.device_name, user=self.request.user)
+        if not devices.exists():
+            return super().form_valid(form)
+        response = super().form_invalid(form)
+        messages.warning(self.request, 'cant have two devices with the same name')
+        return response
 
+# DeviceUpdateView:
+# url: /device/<int:pk>/update
+# Updates existing device
 class DeviceUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Device
-    fields = ['device_name', 'thinger_username', 'token', 'is_connected']
+    fields = ['device_name', 'thinger_username', 'token']
 
     def form_valid(self, form):
         form.instance.user = self.request.user
-        return super().form_valid(form)
+        form.instance.is_connected = False      # TODO: get this vlue from the Thinger.io server
+        devices = Device.objects.filter(device_name =form.instance.device_name, user=self.request.user)
+        if not devices.exists():
+            return super().form_valid(form)
+        response = super().form_invalid(form)
+        messages.warning(self.request, 'cant have two devices with the same name')
+        return response
 
     def test_func(self):
         Device = self.get_object()
@@ -53,6 +78,9 @@ class DeviceUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             return True
         return False
 
+# DeviceDeletView:
+# url: /device/<int:pk>/delete
+# Deletes existing device
 class DeviceDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Device
     success_url = '/'
@@ -62,7 +90,24 @@ class DeviceDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         if self.request.user == Device.user:
             return True
         return False
-#///////////////////// end of device
+
+# DeviceApiListView:
+# url: /device/<str:device_name>
+# Deletes existing device
+class DeviceApiListView(ListView):
+    model = Device
+    template_name='Vinus/device-api-list.html'
+    def get_queryset(self):
+        device=get_object_or_404(Device, device_name=self.kwargs.get('device_name'))
+        return THINGER_API.objects.filter(device=device)
+
+########################### Devices Views ends here ############################
+################################################################################
+######################## THINGER_API Views starts here #########################
+
+# DeviceDeletView:
+# url: /device/<int:pk>/delete
+# Deletes existing device
 class THINGER_APIDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = THINGER_API
     def test_func(self):
@@ -135,12 +180,6 @@ class ResourcesDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
             return True
         return False
 #//////////////////////////
-class DeviceApiListView(ListView):
-    model = Device
-    template_name='Vinus/device-api-list.html'
-    def get_queryset(self):
-        device1=get_object_or_404(Device, device_name=self.kwargs.get('device_name'))
-        return THINGER_API.objects.filter(device=device1)
 
 class ApiResListView(ListView):
     model = THINGER_API

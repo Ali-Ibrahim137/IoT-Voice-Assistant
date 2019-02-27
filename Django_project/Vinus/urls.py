@@ -5,21 +5,23 @@ from .views import (
     DeviceDetailView,
     DeviceUpdateView,
     DeviceDeleteView,
+    DeviceApiListView,
+
     THINGER_APICreateView,
     THINGER_APIDetailView,
     THINGER_APIUpdateView,
     THINGER_APIDeleteView,
+    ApiResListView,
+
     ResourcesCreateView,
     ResourcesDetailView,
     ResourcesUpdateView,
     ResourcesDeleteView,
-    DeviceApiListView,
-    ApiResListView,
 )
 urlpatterns = [
     path('',views.home, name='Vinus-home' ),
     path('device/new/', DeviceCreateView.as_view(), name='device-create'),
-    path('device/<int:pk>/', DeviceDetailView.as_view(), name='device-detail'),
+    path('device/<int:pk>/detail/', DeviceDetailView.as_view(), name='device-detail'),
     path('device/<int:pk>/update/', DeviceUpdateView.as_view(), name='device-update'),
     path('device/<int:pk>/delete/', DeviceDeleteView.as_view(), name='device-delete'),
     path('api/new/', THINGER_APICreateView.as_view(), name='api-create'),
