@@ -7,7 +7,7 @@
       <table style="width:100%">
        <tr>
             <td>Device name</td>
-            <td>{{ object.device_name }}
+            <td><a href="{% url 'device-api-list' object.device_name %}">{{ object.device_name }}</a>
               {% if object.is_connected %}
                 <img src="{% static '/Vinus/check.png' %}" width="25" height="25">
               {% else %}

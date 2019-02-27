@@ -24,12 +24,17 @@ class THINGER_API(models.Model):
     def __str__(self):
         return self.thinger_api_name
 
+    def get_absolute_url(self):
+        return reverse('api-detail', kwargs={'pk': self.pk})
+
 class Resources(models.Model):
     resources_name = models.CharField(max_length=100)
     type = models.IntegerField()
     thinger_api = models.ForeignKey(THINGER_API, on_delete = models.CASCADE, default=True)
     def __str__(self):
         return self.resources_name
+    def get_absolute_url(self):
+        return reverse('res-detail', kwargs={'pk': self.pk})
     # 1 in
     # 2 out
     # 3 in_out

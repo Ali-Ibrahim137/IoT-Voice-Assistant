@@ -1,6 +1,5 @@
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404,  redirect
-from django.urls import reverse
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .models import Device, THINGER_API, Resources
 from django.views.generic import (
@@ -40,6 +39,7 @@ class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
 
 # DeviceCreateView:
 # url: /device/new
+# template_name = 'device_form.html'
 # Creates new device
 class DeviceCreateView(LoginRequiredMixin, CreateView):
     model = Device
@@ -57,6 +57,7 @@ class DeviceCreateView(LoginRequiredMixin, CreateView):
 
 # DeviceUpdateView:
 # url: /device/<int:pk>/update
+# template_name = 'device_form.html'
 # Updates existing device
 class DeviceUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Device
@@ -66,7 +67,12 @@ class DeviceUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
         form.instance.user = self.request.user
         form.instance.is_connected = False      # TODO: get this vlue from the Thinger.io server
         devices = Device.objects.filter(device_name =form.instance.device_name, user=self.request.user)
-        if not devices.exists():
+        cnt = 0
+        for device in devices:
+            cnt = cnt+1
+            if cnt==2:
+                break
+        if(cnt <= 1):
             return super().form_valid(form)
         response = super().form_invalid(form)
         messages.warning(self.request, 'cant have two devices with the same name')
@@ -80,6 +86,7 @@ class DeviceUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 # DeviceDeletView:
 # url: /device/<int:pk>/delete
+# template_name = 'device_confirm_delete.html'
 # Deletes existing device
 class DeviceDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Device
@@ -93,6 +100,7 @@ class DeviceDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 # DeviceApiListView:
 # url: /device/<str:device_name>
+# template_name = 'device-api-list.html.html'
 # Deletes existing device
 class DeviceApiListView(ListView):
     model = Device
