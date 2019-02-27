@@ -13,6 +13,8 @@
           </div>
         </div>
     </div>
+    {% empty %}
+      <h4>No APIs added! <a href="{% url 'api-create' %}">Add here</a></h4>
     {% endfor %}
 </div>
 {%endblock content%}
