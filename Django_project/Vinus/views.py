@@ -29,10 +29,10 @@ def about(request):
 
 # DeviceDetailView:
 # url: /device/<int:pk>/detail
+# template_name = 'device_detail.html'
 # contain device info, without the apis
 class DeviceDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Device
-
     def test_func(self):
         if self.request.user == self.get_object().user:
             return True
@@ -101,13 +101,11 @@ class DeviceApiListView(ListView):
         device=get_object_or_404(Device, device_name=self.kwargs.get('device_name'))
         return THINGER_API.objects.filter(device=device)
 
+
 ########################### Devices Views ends here ############################
 ################################################################################
 ######################## THINGER_API Views starts here #########################
 
-# DeviceDeletView:
-# url: /device/<int:pk>/delete
-# Deletes existing device
 class THINGER_APIDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = THINGER_API
     def test_func(self):

@@ -1,19 +1,47 @@
 {% extends "Vinus/base.html" %}
+{% load static %}
 {% block content%}
-{{ my_model.slug_field_name }}
+
+<style>
+  table{
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+  }
+
+  td, th {
+    border: 1px solid #dddddd;
+    text-align: left;
+    padding: 8px;
+  }
+
+  tr:nth-child(even) {
+    background-color: #dddddd;
+  }
+</style>
   <div class="content-section">
       <div class="content-section">
           <div class="media-body" class="form-group">
-            <div>Device: {{ object.device_name }}</div>
-            <div>User: {{ object.thinger_username }}</div>
-            <div>Token: {{ object.token }}</div>
-            <div>
-              {% if object.is_connected %}
-                Device is connected
-              {% else %}
-                Device is not connected
-              {% endif %}
-            </div>
+            <table style="width:100%">
+             <tr>
+                  <td>Device name</td>
+                  <td>{{ object.device_name }}
+                    {% if object.is_connected %}
+                    <img src="{% static '/Vinus/check.png' %}" width="25" height="25">
+                    {% else %}
+                    <img src="{% static '/Vinus/uncheck.png' %}" width="25" height="25">
+                    {% endif %}
+                  </td>
+             </tr>
+             <tr>
+                <td>Thinger.io Username</td>
+                <td>{{ object.thinger_username }}</td>
+             </tr>
+             <tr>
+                <td>Token</td>
+                <td>{{ object.token }}</td>
+             </tr>
+            </table>
             <div>
               <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'device-update' object.id %}">Update</a>
               <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'device-delete' object.id %}">Delete</a>
