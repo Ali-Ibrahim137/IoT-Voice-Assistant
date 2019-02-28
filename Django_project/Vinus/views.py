@@ -62,17 +62,14 @@ class DeviceCreateView(LoginRequiredMixin, CreateView):
 class DeviceUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Device
     fields = ['device_name', 'thinger_username', 'token']
-
     def form_valid(self, form):
         form.instance.user = self.request.user
         form.instance.is_connected = False      # TODO: get this vlue from the Thinger.io server
         devices = Device.objects.filter(device_name =form.instance.device_name, user=self.request.user)
-        cnt = 0
-        for device in devices:
-            cnt = cnt+1
-            if cnt==2:
-                break
-        if(cnt <= 1):
+        if not devices.exists():
+            return super().form_valid(form)
+
+        if(self.object.device_name ==form.instance.device_name):
             return super().form_valid(form)
         response = super().form_invalid(form)
         messages.warning(self.request, 'cant have two devices with the same name')
@@ -174,8 +171,11 @@ class ApiResListView(ListView):
         thinger_api=get_object_or_404(THINGER_API, thinger_api_name=self.kwargs.get('thinger_api_name'))
         return Resources.objects.filter(thinger_api = thinger_api)
 
-#/////////////////////// end of Api
+
+######################## THINGER_API Views endss here ##########################
 ################################################################################
+######################### Resources Views endss here ###########################
+
 class ResourcesDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Resources
     def test_func(self):
