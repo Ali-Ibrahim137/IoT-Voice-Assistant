@@ -1,4 +1,5 @@
 {% extends "Vinus/base.html" %}
+{% load static %}
 {% block content%}
 {% if user.is_authenticated %}
 <div class="content-section">
@@ -6,13 +7,17 @@
         <legend class="border-bottom mb-4">Devices</legend>
     </fieldset>
     {% for object in object_list  %}
-    <div class="content-section">
+    <article class="media content-section">
+        {% if object.is_connected %}
+          <img class="rounded-circle article-img" src="{% static '/Vinus/check.png' %}">
+        {% else %}
+          <img class="rounded-circle article-img" src="{% static '/Vinus/uncheck.png' %}">
+        {% endif %}
         <div class="media-body" class="form-group">
-          <div>Device: <a href="{% url 'device-detail' object.id %}">{{ object.device_name }}</a></div>
-          <div>User: {{ object.thinger_username }}</div>
-          <div>Token: {{ object.token }}</div>
+          <div class="article-metadata" >Device: <a href="{% url 'device-detail' object.id %}">{{ object.device_name }}</a></div>
+          <div class="article-metadata">User: {{ object.thinger_username }}</div>
         </div>
-    </div>
+    </article>
     {% empty %}
     <h1>There are no devices added</h1>
     <div class="border-top pt-3">

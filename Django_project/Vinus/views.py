@@ -9,6 +9,8 @@ from django.views.generic import (
     UpdateView,
     DeleteView
 )
+import requests
+import json
 ################################################################################
 # home page, contains devices for logged In user
 def home(request):
@@ -47,12 +49,24 @@ class DeviceCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
-        form.instance.is_connected = False      # TODO: get this vlue from the Thinger.io server
+        is_connected = ConnectWithThinger.get_is_connected(form.instance.thinger_username,
+                                                           form.instance.device_name,
+                                                           form.instance.token)
+        if is_connected == -1:
+            response = super().form_invalid(form)
+            messages.warning(self.request, 'No such Device in Your Thinger.io Account!')
+            return response
+        if is_connected == -2:
+            response = super().form_invalid(form)
+            messages.warning(self.request, 'UNAUTHORIZED')
+            return response
+
+        form.instance.is_connected = is_connected
         devices = Device.objects.filter(device_name =form.instance.device_name, user=self.request.user)
         if not devices.exists():
             return super().form_valid(form)
         response = super().form_invalid(form)
-        messages.warning(self.request, 'cant have two devices with the same name')
+        messages.warning(self.request, 'Cant have two devices with the same name')
         return response
 
 # DeviceUpdateView:
@@ -62,17 +76,32 @@ class DeviceCreateView(LoginRequiredMixin, CreateView):
 class DeviceUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Device
     fields = ['device_name', 'thinger_username', 'token']
+
     def form_valid(self, form):
         form.instance.user = self.request.user
-        form.instance.is_connected = False      # TODO: get this vlue from the Thinger.io server
+        is_connected = ConnectWithThinger.get_is_connected(form.instance.thinger_username,
+                                                           form.instance.device_name,
+                                                           form.instance.token)
+        if is_connected ==-1:
+            response = super().form_invalid(form)
+            messages.warning(self.request, 'No such Device in Your Thinger.io Account!')
+            return response
+        if is_connected == -2:
+            response = super().form_invalid(form)
+            messages.warning(self.request, 'UNAUTHORIZED')
+            return response
+        form.instance.is_connected = is_connected
         devices = Device.objects.filter(device_name =form.instance.device_name, user=self.request.user)
         if not devices.exists():
             return super().form_valid(form)
-
-        if(self.object.device_name ==form.instance.device_name):
+        devices = Device.objects.filter(device_name =form.instance.device_name,
+                                        user=self.request.user,
+                                        thinger_username=form.instance.device_name,
+                                        token=form.instance.token)
+        if not devices.exists():
             return super().form_valid(form)
         response = super().form_invalid(form)
-        messages.warning(self.request, 'cant have two devices with the same name')
+        messages.warning(self.request, 'Cant have two devices with the same name')
         return response
 
     def test_func(self):
@@ -211,3 +240,23 @@ class ResourcesDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
             return True
         return False
 #//////////////////////////
+
+
+
+
+class ConnectWithThinger:
+    @classmethod
+    def get_is_connected(cls, thinger_username, device_name, token):
+        try:
+            url = "http://localhost/v1/users/" + thinger_username + "/devices"
+            payload = ""
+            headers = {'authorization': token}
+            response = requests.request("GET", url, data=payload, headers=headers)
+            response = response.text
+            res = json.loads(response)
+            for device in res:
+                if device["device"] == device_name:
+                    return device["connection"]["active"]
+            return -1
+        except:
+            return -2
