@@ -142,7 +142,7 @@ class DeviceApiListView(ListView):
 
 # THINGER_APIDetailView:
 # url: /api/<int:pk>/detail
-# template_name = 'thinger_api_detail.html'
+# template_name = 'thinger_api_detail.html'     not done
 # Contain API info, without the resources
 class THINGER_APIDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = THINGER_API
@@ -160,6 +160,24 @@ class THINGER_APIDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView)
 class THINGER_APICreateView(LoginRequiredMixin, CreateView):
     model = THINGER_API
     fields = ['thinger_api_name', 'device']
+    def form_valid(self, form):
+        device = form.instance.device
+        thinger_username = device.thinger_username
+        device_name = device.device_name
+        token = device.token
+        thinger_api_name = form.instance.thinger_api_name
+        exists = ConnectWithThinger.get_api_exists(thinger_username, device_name, token, thinger_api_name)
+        if exists == 1:
+            return super().form_valid(form)
+        if exists == 0:
+            response = super().form_invalid(form)
+            messages.warning(self.request, 'No such API in Your Thinger.io Device!')
+            return response
+        response = super().form_invalid(form)
+        messages.warning(self.request, 'UNAUTHORIZED')
+        return response
+
+
 
 # THINGER_APIUpdateView:
 # url: api/<int:pk>/update
@@ -258,5 +276,20 @@ class ConnectWithThinger:
                 if device["device"] == device_name:
                     return device["connection"]["active"]
             return -1
-        except:
+        except Exception as e:
             return -2
+    @classmethod
+    def get_api_exists(cls, thinger_username, device_name, token, thinger_api_name):
+        try:
+            url = 'http://localhost/v2/users/'+thinger_username + '/devices/'+device_name + '/api'
+            payload = ""
+            headers = {'Authorization': token}
+            response = requests.request("GET", url, data=payload, headers=headers)
+            response = response.text
+            res = json.loads(response)
+            for api in res:
+                if api == thinger_api_name:
+                    return True
+            return False
+        except Exception as e:
+            return -1
