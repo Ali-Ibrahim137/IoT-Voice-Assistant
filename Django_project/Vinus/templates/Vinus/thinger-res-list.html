@@ -1,0 +1,20 @@
+{% extends "Vinus/base.html" %}
+{% load static %}
+{% block content%}
+<div class="content-section">
+    <fieldset class="form-group">
+        <legend class="border-bottom mb-4">Resources for API {{ view.kwargs.thinger_api_name }}</legend>
+    </fieldset>
+    {% for object in object_list  %}
+    <div class="content-section">
+        <div class="media-body" class="form-group">
+          <div class="">
+            <a href="{% url 'res-detail' object.id %}">{{ object.resources_name }}</a>
+          </div>
+        </div>
+    </div>
+    {% empty %}
+      <h6>No Resources added! <a href="{% url 'res-create' %}">Add here</a></h6>
+    {% endfor %}
+</div>
+{%endblock content%}

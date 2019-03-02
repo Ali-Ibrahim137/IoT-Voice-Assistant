@@ -142,7 +142,7 @@ class DeviceApiListView(ListView):
 
 # THINGER_APIDetailView:
 # url: /api/<int:pk>/detail
-# template_name = 'thinger_api_detail.html'     not done
+# template_name = 'thinger_api_detail.html'
 # Contain API info, without the resources
 class THINGER_APIDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = THINGER_API
@@ -186,6 +186,22 @@ class THINGER_APICreateView(LoginRequiredMixin, CreateView):
 class THINGER_APIUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = THINGER_API
     fields = ['thinger_api_name', 'device']
+    def form_valid(self, form):
+        device = form.instance.device
+        thinger_username = device.thinger_username
+        device_name = device.device_name
+        token = device.token
+        thinger_api_name = form.instance.thinger_api_name
+        exists = ConnectWithThinger.get_api_exists(thinger_username, device_name, token, thinger_api_name)
+        if exists == 1:
+            return super().form_valid(form)
+        if exists == 0:
+            response = super().form_invalid(form)
+            messages.warning(self.request, 'No such API in Your Thinger.io Device!')
+            return response
+        response = super().form_invalid(form)
+        messages.warning(self.request, 'UNAUTHORIZED')
+        return response
 
     def test_func(self):
         THINGER_API = self.get_object()
@@ -209,19 +225,19 @@ class THINGER_APIDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
 
 # ApiResListView:
 # url: /api/<str:thinger_api_name>
-# template_name = 'api-res-list.html.html'
+# template_name = 'thinger-res-list.html'      not done
 # Lists all the Resources for some API
 class ApiResListView(ListView):
     model = THINGER_API
-    template_name='Vinus/api-res-list.html'
+    template_name='Vinus/thinger-res-list.html'
     def get_queryset(self):
         thinger_api=get_object_or_404(THINGER_API, thinger_api_name=self.kwargs.get('thinger_api_name'))
         return Resources.objects.filter(thinger_api = thinger_api)
 
 
-######################## THINGER_API Views endss here ##########################
+######################## THINGER_API Views ends here ###########################
 ################################################################################
-######################### Resources Views endss here ###########################
+######################### Resources Views starts here ##########################
 
 class ResourcesDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Resources

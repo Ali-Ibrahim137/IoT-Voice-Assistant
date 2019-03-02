@@ -16,7 +16,7 @@
        </tr>
       </table>
       <div>
-        <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'device-update' object.id %}">Update</a>
+        <a class="btn btn-success btn-sm mt-1 mb-1" href="{% url 'device-update' object.id %}">Update</a>
         <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'device-delete' object.id %}">Delete</a>
         {% if object.is_connected %}
           <img src="{% static '/Vinus/check.png' %}" width="25" height="25">

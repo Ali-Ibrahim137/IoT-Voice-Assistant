@@ -8,7 +8,7 @@ class Device(models.Model):
     token = models.CharField(max_length=1000)
     is_connected = models.BooleanField()
     user = models.ForeignKey(User, on_delete = models.CASCADE, default=True)
-
+    
     def __str__(self):
         return self.device_name
 

@@ -1,16 +1,24 @@
 {% extends "Vinus/base.html" %}
+{% load static %}
 {% block content%}
-{{ my_model.slug_field_name }}
-  <div class="content-section">
-      <div class="content-section">
-          <div class="media-body" class="form-group">
-            <div>Api: {{ object.thinger_api_name }}</div>
-            <div>Device: {{ object.device}}</div>
-            <div>
-              <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'api-update' object.id %}">Update</a>
-              <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'api-delete' object.id %}">Delete</a>
-            </div>
-          </div>
+
+<div class="content-section">
+    <div class="media-body" class="form-group">
+      <table style="width:100%">
+       <tr>
+            <td>API name</td>
+            <td><a href="{% url 'api-res-list' object.thinger_api_name %}">{{ object.thinger_api_name }}</a>
+            </td>
+       </tr>
+       <tr>
+          <td>Device name</td>
+          <td>{{ object.device.device_name }}</td>
+       </tr>
+      </table>
+      <div>
+        <a class="btn btn-success btn-sm mt-1 mb-1" href="{% url 'api-update' object.id %}">Update</a>
+        <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'api-delete' object.id %}">Delete</a>
       </div>
-  </div>
+    </div>
+</div>
 {%endblock content%}
