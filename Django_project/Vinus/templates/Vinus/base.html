@@ -45,7 +45,7 @@
               </div>
               <div class="navbar-nav">
                 {% if user.is_authenticated %}
-                  <button id ="Refresh" class="btn btn-mini btn-primary" type="button">Refresh</button>
+                  <button id ="Refresh" class="nav-item nav-link btn btn-link" type="button">Refresh</button>
                   <a class="nav-item nav-link" href="{% url 'device-create' %}">New Device</a>
                   <a class="nav-item nav-link" href="{% url 'api-create' %}">New API</a>
                   <a class="nav-item nav-link" href="{% url 'res-create' %}">New Resource</a>
