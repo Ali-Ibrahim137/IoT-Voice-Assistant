@@ -1,3 +1,5 @@
+from django.contrib import admin
+admin.autodiscover()
 from django.urls import path
 from . import views
 from .views import (
@@ -18,7 +20,9 @@ from .views import (
     ResourcesUpdateView,
     ResourcesDeleteView,
 )
+from django.views.generic import RedirectView
 urlpatterns = [
+    path('^favicon\.ico$',RedirectView.as_view(url='/static/images/favicon.ico')),
     path('',views.home, name='Vinus-home' ),
     path('about/',views.about, name='Vinus-about' ),
     path('Refresh_Devices/', views.Refresh_Devices, name='refresh-devices'),

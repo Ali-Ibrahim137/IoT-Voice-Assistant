@@ -281,9 +281,7 @@ class ResourcesDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 def Refresh_Devices(request):
-    template_name = "home.html"
     user = request.user
-    print("Invoked                 !")
     devices = Device.objects.filter(user = user)
     for device in devices:
         thinger_username = device.thinger_username
