@@ -51,9 +51,9 @@
                       Add
                     </button>
                     <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
-                      <a class="dropdown-item" href="{% url 'device-create' %}">New Device</a>
-                      <a class="dropdown-item" href="{% url 'api-create' %}">New API</a>
-                      <a class="dropdown-item" href="{% url 'res-create' %}">New Resource</a>
+                      <a class="dropdown-item form-group media-body"  href="{% url 'device-create' %}">New Device</a>
+                      <a class="dropdown-item form-group media-body"  href="{% url 'api-create' %}">New API</a>
+                      <a class="dropdown-item form-group media-body" href="{% url 'res-create' %}">New Resource</a>
                     </div>
                   </div>
                   <a class="nav-item nav-link" href="{% url 'profile'%}">{{ user.username }}</a>
