@@ -21,7 +21,7 @@ from .views import (
 urlpatterns = [
     path('',views.home, name='Vinus-home' ),
     path('about/',views.about, name='Vinus-about' ),
-
+    path('Refresh_Devices/', views.Refresh_Devices, name='refresh-devices'),
     path('device/new/', DeviceCreateView.as_view(), name='device-create'),
     path('device/<int:pk>/detail/', DeviceDetailView.as_view(), name='device-detail'),
     path('device/<int:pk>/update/', DeviceUpdateView.as_view(), name='device-update'),

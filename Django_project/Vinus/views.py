@@ -1,3 +1,4 @@
+from django.http import HttpResponse
 from django.contrib import messages
 from django.shortcuts import render, get_object_or_404,  redirect
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
@@ -91,13 +92,15 @@ class DeviceUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             messages.warning(self.request, 'UNAUTHORIZED')
             return response
         form.instance.is_connected = is_connected
-        devices = Device.objects.filter(device_name =form.instance.device_name, user=self.request.user)
+
+        devices = Device.objects.filter(device_name = form.instance.device_name, user=self.request.user)
         if not devices.exists():
             return super().form_valid(form)
-        devices = Device.objects.filter(device_name =form.instance.device_name,
-                                        user=self.request.user,
-                                        thinger_username=form.instance.device_name,
-                                        token=form.instance.token)
+        devices = Device.objects.filter(device_name = form.instance.device_name,
+                                        user = self.request.user,
+                                        thinger_username = form.instance.thinger_username,
+                                        token = form.instance.token
+                                        )
         if not devices.exists():
             return super().form_valid(form)
         response = super().form_invalid(form)
@@ -277,9 +280,27 @@ class ResourcesDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 
 
 
-
+def Refresh_Devices(request):
+    template_name = "home.html"
+    user = request.user
+    print("Invoked                 !")
+    devices = Device.objects.filter(user = user)
+    for device in devices:
+        thinger_username = device.thinger_username
+        device_name = device.device_name
+        token = device.token
+        is_connected = ConnectWithThinger.get_is_connected(thinger_username, device_name, token)
+        if is_connected == -1:
+            messages.warning(request, 'Device ' + device_name + ' not in your Thinger Account any more')
+        if is_connected == -2:
+            messages.warning(request, 'UNAUTHORIZED for device ' + device_name)
+        if is_connected==0 or is_connected ==1:
+            device.is_connected = is_connected
+            device.save()
+    return HttpResponse()
 class ConnectWithThinger:
     @classmethod
+
     def get_is_connected(cls, thinger_username, device_name, token):
         try:
             url = "http://localhost/v1/users/" + thinger_username + "/devices"
