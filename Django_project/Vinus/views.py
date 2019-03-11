@@ -305,7 +305,7 @@ class ConnectWithThinger:
         try:
             url = "http://localhost/v1/users/" + thinger_username + "/devices"
             payload = ""
-            headers = {'authorization': token}
+            headers = {'authorization': 'Bearer '+ token}
             response = requests.request("GET", url, data=payload, headers=headers)
             response = response.text
             res = json.loads(response)
@@ -320,7 +320,7 @@ class ConnectWithThinger:
         try:
             url = 'http://localhost/v2/users/'+thinger_username + '/devices/'+device_name + '/api'
             payload = ""
-            headers = {'Authorization': token}
+            headers = {'authorization': 'Bearer '+ token}
             response = requests.request("GET", url, data=payload, headers=headers)
             response = response.text
             res = json.loads(response)
