@@ -33,10 +33,25 @@ def record(request):
                 device.save()
                 messages.warning(request, 'Device not connected')
                 return render(request, 'record/record.html', {'form': form})
-            device.is_connected = False
+            device.is_connected = True
             device.save()
             print ('Done, device name is  ', device.device_name)
             # Extracted the device_name and device is connected
+            apis = set()
+            print (type(device))
+            apis = ParseText.get_thinger_api(text, device)
+            for api in apis:
+                print(api)
+
+            if len(apis) == 0:
+                messages.warning(request, 'No Api name was recognized')
+                return render(request, 'record/record.html', {'form': form})
+            if len(apis) > 1:
+                messages.warning(request, 'More than one Api name recognized')
+                return render(request, 'record/record.html', {'form': form})
+            api = apis.pop()
+
+            # Extracted the api
 
             # print(device)
             # url = "http://localhost/v2/users/qwerty/devices/qwerty/print"
@@ -65,13 +80,29 @@ class ParseText:
             for device in devices:
                 if device.device_name == word:
                     ret.add(device)
-        if len(ret) == 1:
-            return ret
         l = len(words)
         for i in range(1, l):
             word = words[i-1] + '_' +words[i]
             for device in devices:
                 if device.device_name == word:
                     ret.add(device)
+
+        return ret
+    @classmethod
+    def get_thinger_api(cls, text, device):
+        apis = THINGER_API.objects.filter(device = device)
+        # apis = THINGER_API.objects.filter(user = user, device = device)
+        words = text.split(' ')
+        ret = set()
+        for word in words:
+            for api in apis:
+                if api.thinger_api_name == word:
+                    ret.add(api)
+        l = len(words)
+        for i in range(1, l):
+            word = words[i-1] + '_' +words[i]
+            for api in apis:
+                if api.thinger_api_name == word:
+                    ret.add(api)
 
         return ret

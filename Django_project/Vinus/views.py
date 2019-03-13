@@ -291,7 +291,8 @@ def Refresh_Devices(request):
         token = device.token
         is_connected = ConnectWithThinger.get_is_connected(thinger_username, device_name, token)
         if is_connected == -1:
-            messages.warning(request, 'Device ' + device_name + ' not in your Thinger Account any more')
+            messages.warning(request, 'Device ' + device_name + ' not in your Thinger Account any more, it was deleted!')
+            device.delete()
         if is_connected == -2:
             messages.warning(request, 'UNAUTHORIZED for device ' + device_name)
         if is_connected==0 or is_connected ==1:
