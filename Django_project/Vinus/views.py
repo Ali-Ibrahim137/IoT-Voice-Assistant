@@ -10,8 +10,8 @@ from django.views.generic import (
     UpdateView,
     DeleteView
 )
-import requests
 import json
+import requests
 ################################################################################
 # home page, contains devices for logged In user
 def home(request):
@@ -228,7 +228,7 @@ class THINGER_APIDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView)
 
 # ApiResListView:
 # url: /api/<str:thinger_api_name>
-# template_name = 'thinger-res-list.html'      not done
+# template_name = 'thinger-res-list.html'
 # Lists all the Resources for some API
 class ApiResListView(ListView):
     model = THINGER_API
@@ -242,6 +242,7 @@ class ApiResListView(ListView):
 ################################################################################
 ######################### Resources Views starts here ##########################
 
+# template need to be updated:
 class ResourcesDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Resources
     def test_func(self):
@@ -276,9 +277,10 @@ class ResourcesDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         if self.request.user == Resources.thinger_api.device.user:
             return True
         return False
-#//////////////////////////
 
-
+########################## Resources Views ends here ###########################
+################################################################################
+######################## ConnectWithThinger starts here ########################
 
 def Refresh_Devices(request):
     user = request.user
@@ -298,7 +300,6 @@ def Refresh_Devices(request):
     return HttpResponse()
 class ConnectWithThinger:
     @classmethod
-
     def get_is_connected(cls, thinger_username, device_name, token):
         try:
             url = "http://localhost/v1/users/" + thinger_username + "/devices"
