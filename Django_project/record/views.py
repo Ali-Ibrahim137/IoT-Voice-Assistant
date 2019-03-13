@@ -21,7 +21,6 @@ def record(request):
                 messages.warning(request, 'More than one device recognized')
                 return render(request, 'record/record.html', {'form': form})
             device = devices.pop()
-            print (device.device_name)
             is_connected =ConnectWithThinger.get_is_connected(device.thinger_username,
                                                               device.device_name,
                                                               device.token)
@@ -35,13 +34,10 @@ def record(request):
                 return render(request, 'record/record.html', {'form': form})
             device.is_connected = True
             device.save()
-            print ('Done, device name is  ', device.device_name)
             # Extracted the device_name and device is connected
+
             apis = set()
-            print (type(device))
             apis = ParseText.get_thinger_api(text, device)
-            for api in apis:
-                print(api)
 
             if len(apis) == 0:
                 messages.warning(request, 'No Api name was recognized')
@@ -91,7 +87,6 @@ class ParseText:
     @classmethod
     def get_thinger_api(cls, text, device):
         apis = THINGER_API.objects.filter(device = device)
-        # apis = THINGER_API.objects.filter(user = user, device = device)
         words = text.split(' ')
         ret = set()
         for word in words:
