@@ -13,14 +13,20 @@ def record(request):
         if form.is_valid():
             text = form.cleaned_data.get('text')
             form = Record()
+            if len(text) < 5 or text[0:5]!= "vinus":
+                return render(request, 'record/record.html', {'form': form})
             devices = ParseText.get_device_name(text, request.user)
-            if len(devices) == 0:
+            user_devices = Device.objects.filter(user = request.user)
+            if len(devices) == 0 and len(user_devices) !=1:
                 messages.warning(request, 'No device name was recognized')
                 return render(request, 'record/record.html', {'form': form})
-            if len(devices) > 1:
+            if len(devices) > 1 and len(user_devices) !=1:
                 messages.warning(request, 'More than one device recognized')
                 return render(request, 'record/record.html', {'form': form})
-            device = devices.pop()
+            if len(devices) == 1:
+                device = devices.pop()
+            else:
+                device = Device.objects.get(user = request.user)
             is_connected =ConnectWithThinger.get_is_connected(device.thinger_username,
                                                               device.device_name,
                                                               device.token)
@@ -33,20 +39,29 @@ def record(request):
                 messages.warning(request, 'Device not connected')
                 return render(request, 'record/record.html', {'form': form})
             device.is_connected = True
+            print (device.device_name)
             device.save()
             # Extracted the device_name and device is connected
 
             apis = set()
             apis = ParseText.get_thinger_api(text, device)
 
-            if len(apis) == 0:
+            Apis = THINGER_API.objects.filter(device = device)
+
+            if len(apis) == 0 and len(Apis)!=2:
                 messages.warning(request, 'No Api name was recognized')
                 return render(request, 'record/record.html', {'form': form})
-            if len(apis) > 1:
+            if len(apis) > 1 and len(Apis)!=2:
                 messages.warning(request, 'More than one Api name recognized')
                 return render(request, 'record/record.html', {'form': form})
-            api = apis.pop()
+            if len(apis) == 1:
+                api = apis.pop()
+            else:
+                for cur_api in Apis:
+                    if cur_api.thinger_api_name != "api":
+                        api = cur_api
 
+            print (api.thinger_api_name)
             # Extracted the api
 
             # print(device)

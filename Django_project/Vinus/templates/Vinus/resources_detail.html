@@ -4,8 +4,29 @@
   <div class="content-section">
       <div class="content-section">
           <div class="media-body" class="form-group">
-            <div>Resource: {{ object.resources_name }}</div>
-            <div>Type: {{ object.type}}</div>
+            <table style="width:100%">
+             <tr>
+                  <td>Resource name</td>
+                  <td>{{ object.resources_name }}</td>
+             </tr>
+             <tr>
+                <td>Thinger API name</td>
+                <td>{{ object.thinger_api.thinger_api_name }}</td>
+             </tr>
+             <tr>
+                <td>Device name</td>
+                <td>{{ object.thinger_api.device.device_name }}</td>
+             </tr>
+             <tr>
+                <td>type</td>
+                <td>{{ object.get_status_type }}</td>
+             </tr>
+             <tr>
+                <td>Data Type</td>
+                <td>{{ object.get_status_data_type }}</td>
+             </tr>
+
+            </table>
             <div>
               <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'res-update' object.id %}">Update</a>
               <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'res-delete' object.id %}">Delete</a>

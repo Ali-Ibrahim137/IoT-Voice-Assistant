@@ -242,7 +242,10 @@ class ApiResListView(ListView):
 ################################################################################
 ######################### Resources Views starts here ##########################
 
-# template need to be updated:
+# ResourcesDetailView:
+# url: /res/<int:pk>/detail
+# template_name = 'resources_detail.html'
+# Contain Resources info
 class ResourcesDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
     model = Resources
     def test_func(self):
@@ -251,13 +254,21 @@ class ResourcesDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView):
             return True
         return False
 
+# ResourcesCreateView:
+# url: /res/new
+# template_name = 'resources_form.html'
+# Creates new Resource
 class ResourcesCreateView(LoginRequiredMixin, CreateView):
     model = Resources
-    fields = ['resources_name', 'type', 'thinger_api']
+    fields = ['resources_name', 'type', 'data_type' ,'thinger_api']
 
+# ResourcesUpdateView:
+# url: /res/<int:pk>/update
+# template_name = 'resources_form.html'
+# Updates existing Resource
 class ResourcesUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Resources
-    fields = ['resources_name', 'type', 'thinger_api']
+    fields = ['resources_name', 'type', 'data_type' ,'thinger_api']
 
     def form_valid(self, form):
         form.instance.user = self.request.user
@@ -268,6 +279,10 @@ class ResourcesUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
             return True
         return False
 
+# ResourcesDeleteView:
+# url: /res/<int:pk>/delete
+# template_name = 'resources_confirm_delete.html'
+# Deletes existing Resource
 class ResourcesDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
     model = Resources
     success_url = '/'
@@ -279,6 +294,8 @@ class ResourcesDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
         return False
 
 ########################## Resources Views ends here ###########################
+################################################################################
+################################################################################
 ################################################################################
 ######################## ConnectWithThinger starts here ########################
 
