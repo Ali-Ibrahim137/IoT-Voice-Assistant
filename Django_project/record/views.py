@@ -64,6 +64,18 @@ def record(request):
             print (api.thinger_api_name)
             # Extracted the api
 
+            # iterate through all the Resources for this api
+            # for every data_type check if there is some value in the text
+            # ask a question for the other value
+
+            resources = Resources.objects.filter(thinger_api = api)
+            # 1 Output Resources                    Integer
+            # 2 Input Resources                     Double
+            # 3 Input/Output Resources              Bool
+            # 4 Resources without parameters        Other
+
+
+
             # print(device)
             # url = "http://localhost/v2/users/qwerty/devices/qwerty/print"
             # x = {

@@ -71,10 +71,11 @@ class Resources(models.Model):
     @property
     def get_status_data_type(self):
         return choices_data_type[self.data_type-1][1]
-    # 1 Output Resources
-    # 2 Input Resources
-    # 3 Input/Output Resources
-    # 4 Resources without parameters
+
+    # 1 Output Resources                    Integer
+    # 2 Input Resources                     Double
+    # 3 Input/Output Resources              Bool
+    # 4 Resources without parameters        Other
 
 ################################################################################
 ################################################################################

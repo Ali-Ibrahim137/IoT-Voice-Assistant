@@ -262,6 +262,14 @@ class ResourcesCreateView(LoginRequiredMixin, CreateView):
     model = Resources
     fields = ['resources_name', 'type', 'data_type' ,'thinger_api']
 
+    def form_valid(self, form):
+        res = Resources.objects.filter(thinger_api = form.instance.thinger_api,
+                                       data_type = form.instance.data_type)
+        if res.exists():
+            response = super().form_invalid(form)
+            messages.warning(self.request, 'Cant have two Resources with the same data type!')
+            return response
+        return super().form_valid(form)
 # ResourcesUpdateView:
 # url: /res/<int:pk>/update
 # template_name = 'resources_form.html'
@@ -272,6 +280,12 @@ class ResourcesUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
+        res = Resources.objects.filter(thinger_api = form.instance.thinger_api,
+                                       data_type = form.instance.data_type)
+        if res.exists():
+            response = super().form_invalid(form)
+            messages.warning(self.request, 'Cant have two Resources with the same data type!')
+            return response
         return super().form_valid(form)
     def test_func(self):
         Resources = self.get_object()
