@@ -361,3 +361,16 @@ class ConnectWithThinger:
             return False
         except Exception as e:
             return -1
+
+    @classmethod
+    def send_get_reauest(cls, thinger_username, device_name, resources_name, token):
+        url = "http://localhost/v2/users/"+thinger_username+"/devices/"+device_name+"/"+resources_name
+        payload = ""
+        headers = {'authorization': 'Bearer ' + token}
+        thinger_response = requests.request("GET", url, data=payload, headers=headers)
+        print ("Bye")
+        thinger_response = thinger_response.text
+        print(thinger_response)
+        thinger_response = json.loads(thinger_response)
+        value = thinger_response["out"][resources_name]
+        return value
