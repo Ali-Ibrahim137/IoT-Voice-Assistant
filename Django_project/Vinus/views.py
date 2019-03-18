@@ -364,7 +364,6 @@ class ConnectWithThinger:
     @classmethod
     def send_to_thinger(cls, thinger_username, device_name,  thinger_api_name, resources_name, value, token, data_type):
         url = "http://localhost/v2/users/"+thinger_username+"/devices/"+device_name+"/" + thinger_api_name
-        print (value)
         if data_type == Integer_Data or data_type == Bool_Data:
             value = int(value)
         if data_type == Double_Data:
@@ -381,7 +380,7 @@ class ConnectWithThinger:
         response = requests.request("POST", url, data=payload, headers=headers)
 
     @classmethod
-    def send_get_reauest(cls, thinger_username, device_name, resources_name, token):
+    def get_from_thinger(cls, thinger_username, device_name, resources_name, token):
         url = "http://localhost/v2/users/"+thinger_username+"/devices/"+device_name+"/"+resources_name
         payload = ""
         headers = {'authorization': 'Bearer ' + token}
@@ -389,4 +388,34 @@ class ConnectWithThinger:
         thinger_response = thinger_response.text
         thinger_response = json.loads(thinger_response)
         value = thinger_response["out"][resources_name]
+        return value
+    @classmethod
+    def execute_no_par(cls, thinger_username, device_name, thinger_api_name, token):
+        url = "http://localhost/v2/users/"+thinger_username+"/devices/"+device_name+"/"+thinger_api_name
+        payload = ""
+        headers = {'authorization': 'Bearer ' + token}
+        response = requests.request("GET", url, data=payload, headers=headers)
+
+    @classmethod
+    def send_get(cls, thinger_username, device_name, in_res, value, out_res, thinger_api_name ,token, data_type):
+        url = "http://localhost/v2/users/"+thinger_username+"/devices/"+device_name+"/"+thinger_api_name
+        if data_type == Integer_Data or data_type == Bool_Data:
+            value = int(value)
+        if data_type == Double_Data:
+            value = float(value)
+        payload = {
+            in_res.resources_name: value
+        }
+        payload = {
+            "in": payload
+        }
+        payload = json.dumps(payload)
+        headers = {
+            'authorization': "Bearer " + token,
+            'content-type': "application/json"
+        }
+        response = requests.request("POST", url, data=payload, headers=headers)
+        response = response.text
+        response = json.loads(response)
+        value = response["out"][out_res.resources_name]
         return value

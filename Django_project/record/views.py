@@ -84,9 +84,10 @@ def record(request):
             device_name = device.device_name
             thinger_api_name = api.thinger_api_name
             token = device.token
+
             if api.type == Input_API:
                 # input api
-                # extract the value, and send the command to thinger.io
+                # extract the value, and send the value to thinger.io
                 res = Resources.objects.get(thinger_api = api)
                 data = ParseText.get_data(text, res.data_type)
                 if data == "INVALID":
@@ -97,32 +98,33 @@ def record(request):
                 ConnectWithThinger.send_to_thinger(thinger_username, device_name, thinger_api_name,
                                                    resources_name, value, token, res.data_type)
                 return render(request, 'record/record.html', {'form': form})
-
-
-
-
-
-            if tokenize[1] == "get":
-                # read a value from the device
-                # we should find an output resource
-                for res in resources:
-                    if res.type == Output_Res:
-                        print (res.resources_name)
-                        value = ConnectWithThinger.send_get_reauest(device.thinger_username,
-                                                                       device.device_name,
-                                                                       res.resources_name,
-                                                                       device.token)
-                        # got the HTTP response value
-                        messages.success(request, 'The value of ' + res.resources_name + ' is ' + str(value))
-                        return render(request, 'record/record.html', {'form': form})
-                # nothing to get
-                messages.warrning(request, 'Nothing to get')
+            if api.type == Output_API:
+                # output api
+                # Get data from the thinger.io
+                res = Resources.objects.get(thinger_api = api)
+                value = ConnectWithThinger.get_from_thinger(thinger_username, device_name,
+                                                            resources_name, token)
+                messages.success(request, 'The value of ' + resources_name + ' is ' + str(value))
                 return render(request, 'record/record.html', {'form': form})
-
-            # 1 Output Resources                    Integer
-            # 2 Input Resources                     Double
-            # 3 Input/Output Resources              Bool
-            # 4 Resources without parameters        Other
+            if api.type == No_Parameters_API:
+                # no parameters api
+                # Send a request to thinger to execute this api
+                ConnectWithThinger.execute_no_par(thinger_username, device_name, thinger_api_name, token)
+                return render(request, 'record/record.html', {'form': form})
+            if api.type == Input_Outpur_API:
+                # input output API
+                # first send the input value to thinger.io
+                # then  read the output value from thinger.io
+                in_res = Resources.objects.get(thinger_api = api, type = 2)     # 2 is input res
+                data = ParseText.get_data(text, in_res.data_type)
+                if data == "INVALID":
+                    messages.warning(request, 'No data was extracted!')
+                    return render(request, 'record/record.html', {'form': form})
+                value = data
+                out_res = Resources.objects.get(thinger_api = api, type = 1)     # 1 is output res
+                value = ConnectWithThinger.send_get(thinger_username, device_name, in_res, data, out_res, thinger_api_name, token, in_res.data_type)
+                messages.success(request, 'The value of ' + out_res.resources_name + ' is ' + str(value))
+                return render(request, 'record/record.html', {'form': form})
             return render(request, 'record/record.html', {'form': form})
     else:
         form = Record()
@@ -164,14 +166,17 @@ class ParseText:
     @classmethod
     def get_data(cls, data, data_type):
         if data_type == Integer_Data:
-            nums = re.findall('\d+', data)
+            nums = re.findall(r'(?<!\S)[+-]?\d+(?!\S)', data)
             if len(nums)==1:
-                return nums[0]
+                num = nums[0]
+                return num
             return "INVALID"
         if data_type == Double_Data:
-            nums = re.findall("\d+\.\d+",data)
+            nums = re.findall(r"[+-]?\d+(?:\.\d+)?",data)
             if len(nums)==1:
-                return nums[0]
+                num = nums[0]
+                print(num)
+                return num
             return "INVALID"
         if data_type == Bool_Data:
             turn_on  = 0
