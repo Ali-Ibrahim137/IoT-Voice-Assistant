@@ -263,12 +263,6 @@ class ResourcesCreateView(LoginRequiredMixin, CreateView):
     fields = ['resources_name', 'type', 'data_type' ,'thinger_api']
 
     def form_valid(self, form):
-        res = Resources.objects.filter(thinger_api = form.instance.thinger_api,
-                                       data_type = form.instance.data_type)
-        if res.exists():
-            response = super().form_invalid(form)
-            messages.warning(self.request, 'Cant have two Resources with the same data type!')
-            return response
         return super().form_valid(form)
 # ResourcesUpdateView:
 # url: /res/<int:pk>/update
@@ -280,13 +274,8 @@ class ResourcesUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
     def form_valid(self, form):
         form.instance.user = self.request.user
-        res = Resources.objects.filter(thinger_api = form.instance.thinger_api,
-                                       data_type = form.instance.data_type)
-        if res.exists():
-            response = super().form_invalid(form)
-            messages.warning(self.request, 'Cant have two Resources with the same data type!')
-            return response
         return super().form_valid(form)
+
     def test_func(self):
         Resources = self.get_object()
         if self.request.user == Resources.thinger_api.device.user:
@@ -368,9 +357,7 @@ class ConnectWithThinger:
         payload = ""
         headers = {'authorization': 'Bearer ' + token}
         thinger_response = requests.request("GET", url, data=payload, headers=headers)
-        print ("Bye")
         thinger_response = thinger_response.text
-        print(thinger_response)
         thinger_response = json.loads(thinger_response)
         value = thinger_response["out"][resources_name]
         return value

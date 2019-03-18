@@ -75,19 +75,15 @@ def record(request):
             Integer_Data = 1
             Input_Res  = 2
             Double_Data  = 2
-            Input_Outpur_Res  = 3
+            Input_Outpur_Res = 3
             Bool_Data  = 3
             No_Parameters_Res = 4
             Other_Data = 4
-            orders = []
             resources = Resources.objects.filter(thinger_api = api)
             if tokenize[1] == "get":
-                print ("Hi")
                 # read a value from the device
                 # we should find an output resource
-                # def send_get_reauest(thinger_username, device_name, resources_name):
                 for res in resources:
-                    print(res.resources_name)
                     if res.type == Output_Res:
                         print (res.resources_name)
                         value = ConnectWithThinger.send_get_reauest(device.thinger_username,
@@ -96,19 +92,43 @@ def record(request):
                                                                        device.token)
                         # got the HTTP response value
                         messages.success(request, 'The value of ' + res.resources_name + ' is ' + str(value))
-                        print (value)
                         return render(request, 'record/record.html', {'form': form})
-
                 # nothing to get
                 messages.warrning(request, 'Nothing to get')
                 return render(request, 'record/record.html', {'form': form})
+
+            orders = []
             for res in resources:
-                if res.data_type == Integer_Data:
+                if res.data_type == Integer_Data or res.data_type==Double:
                     nums = re.findall('\d+', text)
                     if len(nums)==1:
                         num = nums[0]
                         orders.append([res.resources_name, res.type, num])
                     continue
+                if res.data_type == Other:
+                    if res.type == No_Parameters_Res:
+                        orders.append([res.resources_name, res.type, 0])
+                        continue
+                    # this will be handled later
+                    continue
+                if res.data_type == Bool_Data:
+                    turn_on  = 0
+                    turn_off = 0
+                    l = len(tokenize) - 1
+                    for i in range (1,l):
+                        if tokenize[i-1] + tokenize [i] == "turn on":
+                            turn_on = 1
+                        if tokenize[i-1] + tokenize [i] == "turn off":
+                            turn_off = 1
+                    if turn_on == turn_off:
+                        continue
+                    if turn_on == 1:
+                        orders.append([res.resources_name, res.type, 1])
+                    if turn_off == 1:
+                        orders.append([res.resources_name, res.type, 0])
+                    continue
+
+
             # 1 Output Resources                    Integer
             # 2 Input Resources                     Double
             # 3 Input/Output Resources              Bool
