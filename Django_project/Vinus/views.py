@@ -162,13 +162,14 @@ class THINGER_APIDetailView(LoginRequiredMixin, UserPassesTestMixin, DetailView)
 # Creates new API
 class THINGER_APICreateView(LoginRequiredMixin, CreateView):
     model = THINGER_API
-    fields = ['thinger_api_name', 'device']
+    fields = ['thinger_api_name', 'device', 'type']
     def form_valid(self, form):
         device = form.instance.device
         thinger_username = device.thinger_username
         device_name = device.device_name
         token = device.token
         thinger_api_name = form.instance.thinger_api_name
+        type=form.instance.type
         exists = ConnectWithThinger.get_api_exists(thinger_username, device_name, token, thinger_api_name)
         if exists == 1:
             return super().form_valid(form)
@@ -188,13 +189,14 @@ class THINGER_APICreateView(LoginRequiredMixin, CreateView):
 # Updates existing api
 class THINGER_APIUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = THINGER_API
-    fields = ['thinger_api_name', 'device']
+    fields = ['thinger_api_name', 'device', 'type']
     def form_valid(self, form):
         device = form.instance.device
         thinger_username = device.thinger_username
         device_name = device.device_name
         token = device.token
         thinger_api_name = form.instance.thinger_api_name
+        type=form.instance.type
         exists = ConnectWithThinger.get_api_exists(thinger_username, device_name, token, thinger_api_name)
         if exists == 1:
             return super().form_valid(form)

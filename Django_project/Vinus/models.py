@@ -19,9 +19,23 @@ class Device(models.Model):
 ################################################################################
 ################################################################################
 ################################################################################
+choices_type = (
+    (1, 'Output APIs'),
+    (2, 'Input APIs'),
+    (3, 'Input/Output APIs'),
+    (4, 'APIs without parameters'),
+)
 class THINGER_API(models.Model):
     thinger_api_name = models.CharField(max_length=100)
     device = models.ForeignKey(Device, on_delete = models.CASCADE, default=True)
+    type = models.IntegerField(
+        choices=choices_type,
+        default=1,
+    )
+    @property
+    def get_status_type(self):
+        return choices_type[self.type-1][1]
+
     def __str__(self):
         return self.thinger_api_name
 
@@ -34,11 +48,9 @@ class THINGER_API(models.Model):
 ################################################################################
 ################################################################################
 ################################################################################
-choices_type = (
+choices_type_res = (
     (1, 'Output Resources'),
     (2, 'Input Resources'),
-    (3, 'Input/Output Resources'),
-    (4, 'Resources without parameters'),
 )
 choices_data_type = (
     (1, 'Integer'),
@@ -49,7 +61,7 @@ choices_data_type = (
 class Resources(models.Model):
     resources_name = models.CharField(max_length=100)
     type = models.IntegerField(
-        choices=choices_type,
+        choices=choices_type_res,
         default=1,
     )
 
@@ -66,7 +78,7 @@ class Resources(models.Model):
 
     @property
     def get_status_type(self):
-        return choices_type[self.type-1][1]
+        return choices_type_res[self.type-1][1]
 
     @property
     def get_status_data_type(self):
