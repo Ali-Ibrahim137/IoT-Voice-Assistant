@@ -266,6 +266,7 @@ class ResourcesCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         return super().form_valid(form)
+
 # ResourcesUpdateView:
 # url: /res/<int:pk>/update
 # template_name = 'resources_form.html'
@@ -321,6 +322,13 @@ def Refresh_Devices(request):
             device.is_connected = is_connected
             device.save()
     return HttpResponse()
+
+
+# Literals:
+Integer_Data = 1
+Double_Data  = 2
+Bool_Data  = 3
+Other_Data = 4
 class ConnectWithThinger:
     @classmethod
     def get_is_connected(cls, thinger_username, device_name, token):
@@ -352,6 +360,25 @@ class ConnectWithThinger:
             return False
         except Exception as e:
             return -1
+
+    @classmethod
+    def send_to_thinger(cls, thinger_username, device_name,  thinger_api_name, resources_name, value, token, data_type):
+        url = "http://localhost/v2/users/"+thinger_username+"/devices/"+device_name+"/" + thinger_api_name
+        print (value)
+        if data_type == Integer_Data or data_type == Bool_Data:
+            value = int(value)
+        if data_type == Double_Data:
+            value = float(value)
+        payload = {
+            resources_name: value
+        }
+        payload = json.dumps(payload)
+        # vinus move camera one 30 deg to the left
+        headers = {
+            'authorization': "Bearer " + token,
+            'content-type': "application/json"
+        }
+        response = requests.request("POST", url, data=payload, headers=headers)
 
     @classmethod
     def send_get_reauest(cls, thinger_username, device_name, resources_name, token):

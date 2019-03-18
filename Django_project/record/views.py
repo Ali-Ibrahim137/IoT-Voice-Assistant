@@ -8,6 +8,16 @@ import requests
 import json
 import re
 import nltk
+
+Output_API = 1
+Integer_Data = 1
+Input_API  = 2
+Double_Data  = 2
+Input_Outpur_API = 3
+Bool_Data  = 3
+No_Parameters_API = 4
+Other_Data = 4
+
 @login_required
 def record(request):
     if request.method == 'POST':
@@ -18,7 +28,6 @@ def record(request):
             form = Record()
             if tokenize[0]!="vinus":
                 return render(request, 'record/record.html', {'form': form})
-
             devices = ParseText.get_device_name(tokenize, request.user)
             user_devices = Device.objects.filter(user = request.user)
             if len(devices) == 0 and len(user_devices) !=1:
@@ -43,8 +52,8 @@ def record(request):
                 messages.warning(request, 'Device not connected')
                 return render(request, 'record/record.html', {'form': form})
             device.is_connected = True
-            # print (device.device_name)
             device.save()
+
             # Extracted the device_name and device is connected
 
             apis = set()
@@ -65,21 +74,34 @@ def record(request):
                     if cur_api.thinger_api_name != "api":
                         api = cur_api
 
-            # print (api.thinger_api_name)
             # Extracted the api
-
             # iterate through all the Resources for this api
             # for every data_type check if there is some value in the text
             # ask a question for the other value
-            Output_Res = 1
-            Integer_Data = 1
-            Input_Res  = 2
-            Double_Data  = 2
-            Input_Outpur_Res = 3
-            Bool_Data  = 3
-            No_Parameters_Res = 4
-            Other_Data = 4
+            print(api.thinger_api_name, api.type)
             resources = Resources.objects.filter(thinger_api = api)
+            thinger_username = device.thinger_username
+            device_name = device.device_name
+            thinger_api_name = api.thinger_api_name
+            token = device.token
+            if api.type == Input_API:
+                # input api
+                # extract the value, and send the command to thinger.io
+                res = Resources.objects.get(thinger_api = api)
+                data = ParseText.get_data(text, res.data_type)
+                if data == "INVALID":
+                    messages.warning(request, 'No data was extracted!')
+                    return render(request, 'record/record.html', {'form': form})
+                resources_name = res.resources_name
+                value = data
+                ConnectWithThinger.send_to_thinger(thinger_username, device_name, thinger_api_name,
+                                                   resources_name, value, token, res.data_type)
+                return render(request, 'record/record.html', {'form': form})
+
+
+
+
+
             if tokenize[1] == "get":
                 # read a value from the device
                 # we should find an output resource
@@ -96,38 +118,6 @@ def record(request):
                 # nothing to get
                 messages.warrning(request, 'Nothing to get')
                 return render(request, 'record/record.html', {'form': form})
-
-            orders = []
-            for res in resources:
-                if res.data_type == Integer_Data or res.data_type==Double:
-                    nums = re.findall('\d+', text)
-                    if len(nums)==1:
-                        num = nums[0]
-                        orders.append([res.resources_name, res.type, num])
-                    continue
-                if res.data_type == Other:
-                    if res.type == No_Parameters_Res:
-                        orders.append([res.resources_name, res.type, 0])
-                        continue
-                    # this will be handled later
-                    continue
-                if res.data_type == Bool_Data:
-                    turn_on  = 0
-                    turn_off = 0
-                    l = len(tokenize) - 1
-                    for i in range (1,l):
-                        if tokenize[i-1] + tokenize [i] == "turn on":
-                            turn_on = 1
-                        if tokenize[i-1] + tokenize [i] == "turn off":
-                            turn_off = 1
-                    if turn_on == turn_off:
-                        continue
-                    if turn_on == 1:
-                        orders.append([res.resources_name, res.type, 1])
-                    if turn_off == 1:
-                        orders.append([res.resources_name, res.type, 0])
-                    continue
-
 
             # 1 Output Resources                    Integer
             # 2 Input Resources                     Double
@@ -170,6 +160,36 @@ class ParseText:
                 if api.thinger_api_name == word:
                     ret.add(api)
         return ret
+
+    @classmethod
+    def get_data(cls, data, data_type):
+        if data_type == Integer_Data:
+            nums = re.findall('\d+', data)
+            if len(nums)==1:
+                return nums[0]
+            return "INVALID"
+        if data_type == Double_Data:
+            nums = re.findall("\d+\.\d+",data)
+            if len(nums)==1:
+                return nums[0]
+            return "INVALID"
+        if data_type == Bool_Data:
+            turn_on  = 0
+            turn_off = 0
+            l = len(data) - 1
+            for i in range (1,l):
+                if data[i-1] + data [i] == "turn on":
+                    turn_on = 1
+                if data[i-1] + data [i] == "turn off":
+                    turn_off = 1
+                if turn_on == turn_off:
+                    return "INVALID"
+                if turn_on == 1:
+                    return 1
+                if turn_off == 1:
+                    return 0
+        # data_type = other     will be handled later
+        return "hello"
 
 
 
