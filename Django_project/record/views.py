@@ -102,9 +102,10 @@ def record(request):
                 # output api
                 # Get data from the thinger.io
                 res = Resources.objects.get(thinger_api = api)
+                resources_name = res.resources_name
                 value = ConnectWithThinger.get_from_thinger(thinger_username, device_name,
-                                                            resources_name, token)
-                messages.success(request, 'The value of ' + resources_name + ' is ' + str(value))
+                                                            thinger_api_name, resources_name ,token)
+                messages.success(request, 'The value of ' + thinger_api_name + ' is ' + str(value))
                 return render(request, 'record/record.html', {'form': form})
             if api.type == No_Parameters_API:
                 # no parameters api

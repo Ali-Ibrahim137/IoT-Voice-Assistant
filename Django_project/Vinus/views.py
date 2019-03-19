@@ -380,8 +380,8 @@ class ConnectWithThinger:
         response = requests.request("POST", url, data=payload, headers=headers)
 
     @classmethod
-    def get_from_thinger(cls, thinger_username, device_name, resources_name, token):
-        url = "http://localhost/v2/users/"+thinger_username+"/devices/"+device_name+"/"+resources_name
+    def get_from_thinger(cls, thinger_username, device_name, thinger_api_name, resources_name ,token):
+        url = "http://localhost/v2/users/"+thinger_username+"/devices/"+device_name+"/"+thinger_api_name
         payload = ""
         headers = {'authorization': 'Bearer ' + token}
         thinger_response = requests.request("GET", url, data=payload, headers=headers)
