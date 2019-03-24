@@ -305,6 +305,9 @@ class ResourcesDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 ################################################################################
 ######################## ConnectWithThinger starts here ########################
 
+URL = "http://localhost:8080"
+
+
 def Refresh_Devices(request):
     user = request.user
     devices = Device.objects.filter(user = user)
@@ -333,7 +336,7 @@ class ConnectWithThinger:
     @classmethod
     def get_is_connected(cls, thinger_username, device_name, token):
         try:
-            url = "http://localhost/v1/users/" + thinger_username + "/devices"
+            url =  URL + "/v1/users/" + thinger_username + "/devices"
             payload = ""
             headers = {'authorization': 'Bearer '+ token}
             response = requests.request("GET", url, data=payload, headers=headers)
@@ -348,7 +351,7 @@ class ConnectWithThinger:
     @classmethod
     def get_api_exists(cls, thinger_username, device_name, token, thinger_api_name):
         try:
-            url = 'http://localhost/v2/users/'+thinger_username + '/devices/'+device_name + '/api'
+            url = URL + "/v2/users/"+thinger_username + '/devices/'+device_name + '/api'
             payload = ""
             headers = {'authorization': 'Bearer '+ token}
             response = requests.request("GET", url, data=payload, headers=headers)
@@ -363,7 +366,7 @@ class ConnectWithThinger:
 
     @classmethod
     def send_to_thinger(cls, thinger_username, device_name,  thinger_api_name, resources_name, value, token, data_type):
-        url = "http://localhost/v2/users/"+thinger_username+"/devices/"+device_name+"/" + thinger_api_name
+        url = URL + "/v2/users/"+thinger_username+"/devices/"+device_name+"/" + thinger_api_name
         if data_type == Integer_Data or data_type == Bool_Data:
             value = int(value)
         if data_type == Double_Data:
@@ -381,7 +384,7 @@ class ConnectWithThinger:
 
     @classmethod
     def get_from_thinger(cls, thinger_username, device_name, thinger_api_name, resources_name ,token):
-        url = "http://localhost/v2/users/"+thinger_username+"/devices/"+device_name+"/"+thinger_api_name
+        url = URL + "/v2/users/"+thinger_username+"/devices/"+device_name+"/"+thinger_api_name
         payload = ""
         headers = {'authorization': 'Bearer ' + token}
         thinger_response = requests.request("GET", url, data=payload, headers=headers)
@@ -391,14 +394,14 @@ class ConnectWithThinger:
         return value
     @classmethod
     def execute_no_par(cls, thinger_username, device_name, thinger_api_name, token):
-        url = "http://localhost/v2/users/"+thinger_username+"/devices/"+device_name+"/"+thinger_api_name
+        url = URL + "/v2/users/"+thinger_username+"/devices/"+device_name+"/"+thinger_api_name
         payload = ""
         headers = {'authorization': 'Bearer ' + token}
         response = requests.request("GET", url, data=payload, headers=headers)
 
     @classmethod
     def send_get(cls, thinger_username, device_name, in_res, value, out_res, thinger_api_name ,token, data_type):
-        url = "http://localhost/v2/users/"+thinger_username+"/devices/"+device_name+"/"+thinger_api_name
+        url = URL + "/v2/users/"+thinger_username+"/devices/"+device_name+"/"+thinger_api_name
         if data_type == Integer_Data or data_type == Bool_Data:
             value = int(value)
         if data_type == Double_Data:

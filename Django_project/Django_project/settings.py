@@ -25,7 +25,7 @@ SECRET_KEY = 'q&jm#f3(6cudy2ha&^+@2v@6r%0n(v-e*u=tnc936e3(04&el5'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -34,7 +34,7 @@ INSTALLED_APPS = [
     'record.apps.RecordConfig',
     'Vinus.apps.VinusConfig',
     'users.apps.UsersConfig',
-    
+
     'crispy_forms',
     'django.contrib.admin',
     'django.contrib.auth',
