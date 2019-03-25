@@ -1,3 +1,4 @@
+from django.http import JsonResponse
 from django.contrib import messages
 from django.shortcuts import render
 from .forms import Record
@@ -20,116 +21,39 @@ Other_Data = 4
 
 @login_required
 def record(request):
+    text = request.GET.get('message', None)
+    text = str(text)
+    tokenize = nltk.word_tokenize(text)
+    if len(tokenize) !=0 and tokenize[0]!='None':
+        form = Record()
+        return ParseText.Handle(tokenize, form, request)
     if request.method == 'POST':
         form = Record(request.POST)
         if form.is_valid():
             text = form.cleaned_data.get('text')
-            tokenize = nltk.word_tokenize(text)
             form = Record()
-            if tokenize[0]!="vinus":
-                return render(request, 'record/record.html', {'form': form})
-            devices = ParseText.get_device_name(tokenize, request.user)
-            user_devices = Device.objects.filter(user = request.user)
-            if len(devices) == 0 and len(user_devices) !=1:
-                messages.warning(request, 'No device name was recognized')
-                return render(request, 'record/record.html', {'form': form})
-            if len(devices) > 1 and len(user_devices) !=1:
-                messages.warning(request, 'More than one device recognized')
-                return render(request, 'record/record.html', {'form': form})
-            if len(devices) == 1:
-                device = devices.pop()
-            else:
-                device = Device.objects.get(user = request.user)
-            is_connected =ConnectWithThinger.get_is_connected(device.thinger_username,
-                                                              device.device_name,
-                                                              device.token)
-            if is_connected == -2:
-                messages.warning(request, 'UNAUTHORIZED')
-                return render(request, 'record/record.html', {'form': form})
-            if is_connected == 0:
-                device.is_connected = False
-                device.save()
-                messages.warning(request, 'Device not connected')
-                return render(request, 'record/record.html', {'form': form})
-            device.is_connected = True
-            device.save()
-
-            # Extracted the device_name and device is connected
-
-            apis = set()
-            apis = ParseText.get_thinger_api(tokenize, device)
-
-            Apis = THINGER_API.objects.filter(device = device)
-
-            if len(apis) == 0 and len(Apis)!=2:
-                messages.warning(request, 'No Api name was recognized')
-                return render(request, 'record/record.html', {'form': form})
-            if len(apis) > 1 and len(Apis)!=2:
-                messages.warning(request, 'More than one Api name recognized')
-                return render(request, 'record/record.html', {'form': form})
-            if len(apis) == 1:
-                api = apis.pop()
-            else:
-                for cur_api in Apis:
-                    if cur_api.thinger_api_name != "api":
-                        api = cur_api
-
-            # Extracted the api
-            # iterate through all the Resources for this api
-            # for every data_type check if there is some value in the text
-            # ask a question for the other value
-            print(api.thinger_api_name, api.type)
-            resources = Resources.objects.filter(thinger_api = api)
-            thinger_username = device.thinger_username
-            device_name = device.device_name
-            thinger_api_name = api.thinger_api_name
-            token = device.token
-
-            if api.type == Input_API:
-                # input api
-                # extract the value, and send the value to thinger.io
-                res = Resources.objects.get(thinger_api = api)
-                data = ParseText.get_data(text, res.data_type)
-                if data == "INVALID":
-                    messages.warning(request, 'No data was extracted!')
-                    return render(request, 'record/record.html', {'form': form})
-                resources_name = res.resources_name
-                value = data
-                ConnectWithThinger.send_to_thinger(thinger_username, device_name, thinger_api_name,
-                                                   resources_name, value, token, res.data_type)
-                return render(request, 'record/record.html', {'form': form})
-            if api.type == Output_API:
-                # output api
-                # Get data from the thinger.io
-                res = Resources.objects.get(thinger_api = api)
-                resources_name = res.resources_name
-                value = ConnectWithThinger.get_from_thinger(thinger_username, device_name,
-                                                            thinger_api_name, resources_name ,token)
-                messages.success(request, 'The value of ' + thinger_api_name + ' is ' + str(value))
-                return render(request, 'record/record.html', {'form': form})
-            if api.type == No_Parameters_API:
-                # no parameters api
-                # Send a request to thinger to execute this api
-                ConnectWithThinger.execute_no_par(thinger_username, device_name, thinger_api_name, token)
-                return render(request, 'record/record.html', {'form': form})
-            if api.type == Input_Outpur_API:
-                # input output API
-                # first send the input value to thinger.io
-                # then  read the output value from thinger.io
-                in_res = Resources.objects.get(thinger_api = api, type = 2)     # 2 is input res
-                data = ParseText.get_data(text, in_res.data_type)
-                if data == "INVALID":
-                    messages.warning(request, 'No data was extracted!')
-                    return render(request, 'record/record.html', {'form': form})
-                value = data
-                out_res = Resources.objects.get(thinger_api = api, type = 1)     # 1 is output res
-                value = ConnectWithThinger.send_get(thinger_username, device_name, in_res, data, out_res, thinger_api_name, token, in_res.data_type)
-                messages.success(request, 'The value of ' + out_res.resources_name + ' is ' + str(value))
-                return render(request, 'record/record.html', {'form': form})
-            return render(request, 'record/record.html', {'form': form})
+            tokenize = nltk.word_tokenize(text)
+            return ParseText.Handle(tokenize, form, request)
     else:
         form = Record()
     return render(request, 'record/record.html', {'form': form})
+
+
+def editDistDP(str1, str2, m, n):
+    dp = [[0 for x in range(n+1)] for x in range(m+1)]
+    for i in range(m+1):
+        for j in range(n+1):
+            if i == 0:
+                dp[i][j] = j
+            elif j == 0:
+                dp[i][j] = i
+            elif str1[i-1] == str2[j-1]:
+                dp[i][j] = dp[i-1][j-1]
+            else:
+                dp[i][j] = 1 + min(dp[i][j-1],        # Insert
+                                   dp[i-1][j],        # Remove
+                                   dp[i-1][j-1])      # Replace
+    return dp[m][n]
 
 class ParseText:
     @classmethod
@@ -195,7 +119,110 @@ class ParseText:
                 if turn_off == 1:
                     return 0
         # data_type = other     will be handled later
-        return "hello"
+
+    @classmethod
+    def Handle(cls, tokenize, form, request):
+        print(tokenize)
+        f = 0;
+        for i in tokenize:
+            i = i.lower()
+            if editDistDP(i, 'vinus', len(i), 5) <= 3:
+                f = 1
+        if f == 0:
+            return render(request, 'record/record.html', {'form': form})
+        devices = ParseText.get_device_name(tokenize, request.user)
+        user_devices = Device.objects.filter(user = request.user)
+        if len(devices) == 0 and len(user_devices) !=1:
+            messages.warning(request, 'No device name was recognized')
+            return render(request, 'record/record.html', {'form': form})
+        if len(devices) > 1 and len(user_devices) !=1:
+            messages.warning(request, 'More than one device recognized')
+            return render(request, 'record/record.html', {'form': form})
+        if len(devices) == 1:
+            device = devices.pop()
+        else:
+            device = Device.objects.get(user = request.user)
+        is_connected =ConnectWithThinger.get_is_connected(device.thinger_username,
+                                                          device.device_name,
+                                                          device.token)
+        if is_connected == -2:
+            messages.warning(request, 'UNAUTHORIZED')
+            return render(request, 'record/record.html', {'form': form})
+        if is_connected == 0:
+            device.is_connected = False
+            device.save()
+            messages.warning(request, 'Device not connected')
+            return render(request, 'record/record.html', {'form': form})
+        device.is_connected = True
+        device.save()
+        # Extracted the device_name and device is connected
+        apis = set()
+        apis = ParseText.get_thinger_api(tokenize, device)
+        Apis = THINGER_API.objects.filter(device = device)
+        if len(apis) == 0 and len(Apis)!=2:
+            messages.warning(request, 'No Api name was recognized')
+            return render(request, 'record/record.html', {'form': form})
+        if len(apis) > 1 and len(Apis)!=2:
+            messages.warning(request, 'More than one Api name recognized')
+            return render(request, 'record/record.html', {'form': form})
+        if len(apis) == 1:
+            api = apis.pop()
+        else:
+            for cur_api in Apis:
+                if cur_api.thinger_api_name != "api":
+                    api = cur_api
+        # Extracted the api
+        # iterate through all the Resources for this api
+        # for every data_type check if there is some value in the text
+        # ask a question for the other value
+        resources = Resources.objects.filter(thinger_api = api)
+        thinger_username = device.thinger_username
+        device_name = device.device_name
+        thinger_api_name = api.thinger_api_name
+        token = device.token
+
+        if api.type == Input_API:
+            # input api
+            # extract the value, and send the value to thinger.io
+            res = Resources.objects.get(thinger_api = api)
+            data = ParseText.get_data(text, res.data_type)
+            if data == "INVALID":
+                messages.warning(request, 'No data was extracted!')
+                return render(request, 'record/record.html', {'form': form})
+            resources_name = res.resources_name
+            value = data
+            ConnectWithThinger.send_to_thinger(thinger_username, device_name, thinger_api_name,
+                                               resources_name, value, token, res.data_type)
+            return render(request, 'record/record.html', {'form': form})
+        if api.type == Output_API:
+            # output api
+            # Get data from the thinger.io
+            res = Resources.objects.get(thinger_api = api)
+            resources_name = res.resources_name
+            value = ConnectWithThinger.get_from_thinger(thinger_username, device_name,
+                                                        thinger_api_name, resources_name ,token)
+            messages.success(request, 'The value of ' + thinger_api_name + ' is ' + str(value))
+            return render(request, 'record/record.html', {'form': form})
+        if api.type == No_Parameters_API:
+            # no parameters api
+            # Send a request to thinger to execute this api
+            ConnectWithThinger.execute_no_par(thinger_username, device_name, thinger_api_name, token)
+            return render(request, 'record/record.html', {'form': form})
+        if api.type == Input_Outpur_API:
+            # input output API
+            # first send the input value to thinger.io
+            # then  read the output value from thinger.io
+            in_res = Resources.objects.get(thinger_api = api, type = 2)     # 2 is input res
+            data = ParseText.get_data(text, in_res.data_type)
+            if data == "INVALID":
+                messages.warning(request, 'No data was extracted!')
+                return render(request, 'record/record.html', {'form': form})
+            value = data
+            out_res = Resources.objects.get(thinger_api = api, type = 1)     # 1 is output res
+            value = ConnectWithThinger.send_get(thinger_username, device_name, in_res, data, out_res, thinger_api_name, token, in_res.data_type)
+            messages.success(request, 'The value of ' + out_res.resources_name + ' is ' + str(value))
+            return render(request, 'record/record.html', {'form': form})
+
 
 
 
