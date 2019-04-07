@@ -26,14 +26,14 @@ def record(request):
     tokenize = nltk.word_tokenize(text)
     if len(tokenize) !=0 and tokenize[0]!='None':
         form = Record()
-        return ParseText.Handle(tokenize, form, request)
+        return ParseText.Handle(tokenize, text, form, request)
     if request.method == 'POST':
         form = Record(request.POST)
         if form.is_valid():
             text = form.cleaned_data.get('text')
             form = Record()
             tokenize = nltk.word_tokenize(text)
-            return ParseText.Handle(tokenize, form, request)
+            return ParseText.Handle(tokenize, text, form, request)
     else:
         form = Record()
     return render(request, 'record/record.html', {'form': form})
@@ -72,6 +72,7 @@ class ParseText:
                     ret.add(device)
 
         return ret
+
     @classmethod
     def get_thinger_api(cls, text, device):
         apis = THINGER_API.objects.filter(device = device)
@@ -121,7 +122,7 @@ class ParseText:
         # data_type = other     will be handled later
 
     @classmethod
-    def Handle(cls, tokenize, form, request):
+    def Handle(cls, tokenize, text ,form, request):
         print(tokenize)
         f = 0;
         for i in tokenize:
