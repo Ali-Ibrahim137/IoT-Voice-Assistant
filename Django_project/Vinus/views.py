@@ -306,8 +306,7 @@ class ResourcesDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
 ################################################################################
 ######################## ConnectWithThinger starts here ########################
 
-URL = "http://localhost:8080"
-
+URL = "https://api.thinger.io"
 
 def Refresh_Devices(request):
     user = request.user

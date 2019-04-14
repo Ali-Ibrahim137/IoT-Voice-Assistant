@@ -101,17 +101,18 @@ class ParseText:
             nums = re.findall(r"[+-]?\d+(?:\.\d+)?",data)
             if len(nums)==1:
                 num = nums[0]
-                print(num)
                 return num
             return "INVALID"
         if data_type == Bool_Data:
             turn_on  = 0
             turn_off = 0
+            data = re.findall(r'^(\S+)\s+(\S+)$', data)
             l = len(data) - 1
             for i in range (1,l):
-                if data[i-1] + data [i] == "turn on":
+                print(data[i-1] + ' ' + data [i])
+                if data[i-1] + ' ' + data [i] == "turn on":
                     turn_on = 1
-                if data[i-1] + data [i] == "turn off":
+                if data[i-1] + ' ' + data [i] == "turn off":
                     turn_off = 1
                 if turn_on == turn_off:
                     return "INVALID"
