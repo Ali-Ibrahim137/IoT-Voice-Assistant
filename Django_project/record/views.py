@@ -23,8 +23,9 @@ Other_Data = 4
 def record(request):
     text = request.GET.get('message', None)
     text = str(text)
+    text = text.lower()
     tokenize = nltk.word_tokenize(text)
-    if len(tokenize) !=0 and tokenize[0]!='None':
+    if len(tokenize) !=0 and tokenize[0]!='none':
         form = Record()
         return ParseText.Handle(tokenize, text, form, request)
     if request.method == 'POST':
@@ -32,6 +33,8 @@ def record(request):
         if form.is_valid():
             text = form.cleaned_data.get('text')
             form = Record()
+            text = text.lower()
+            print('text is ', text)
             tokenize = nltk.word_tokenize(text)
             return ParseText.Handle(tokenize, text, form, request)
     else:
@@ -106,20 +109,19 @@ class ParseText:
         if data_type == Bool_Data:
             turn_on  = 0
             turn_off = 0
-            data = re.findall(r'^(\S+)\s+(\S+)$', data)
-            l = len(data) - 1
+            tokenize = nltk.word_tokenize(data)
+            l = len(tokenize)
             for i in range (1,l):
-                print(data[i-1] + ' ' + data [i])
-                if data[i-1] + ' ' + data [i] == "turn on":
+                if tokenize[i-1] + ' ' + tokenize [i] == "turn on":
                     turn_on = 1
-                if data[i-1] + ' ' + data [i] == "turn off":
+                if tokenize[i-1] + ' ' + tokenize [i] == "turn off":
                     turn_off = 1
-                if turn_on == turn_off:
-                    return "INVALID"
-                if turn_on == 1:
-                    return 1
-                if turn_off == 1:
-                    return 0
+            if turn_on == turn_off:
+                return "INVALID"
+            if turn_on == 1:
+                return 1
+            if turn_off == 1:
+                return 0
         # data_type = other     will be handled later
 
     @classmethod
@@ -193,6 +195,7 @@ class ParseText:
                 return render(request, 'record/record.html', {'form': form})
             resources_name = res.resources_name
             value = data
+            print('data is ', data)
             ConnectWithThinger.send_to_thinger(thinger_username, device_name, thinger_api_name,
                                                resources_name, value, token, res.data_type)
             return render(request, 'record/record.html', {'form': form})

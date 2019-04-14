@@ -78,12 +78,18 @@ void setup() {
 }
 
 void loop() {
-  digitalWrite(LED_BUILTIN, LOW);
-  delay(1000);
-  digitalWrite(LED_BUILTIN, HIGH);
-  delay(2000);
   if(autoMode==1){
     while(1){
+      int temp = dht.readTemperature();
+      if(temp<25){
+        ledState = HIGH;
+        break;
+      }
+      digitalWrite(LedPin, LOW);
+      delay(100);
+      digitalWrite(LedPin, HIGH);
+      delay(200);
+      continue;
       double SoilMoistureSensorValue = map(analogRead(SoilMoistureSensorPin), 0, 1023, 0, 100);
       if(SoilMoistureSensorValue>40){         // 40% or someother value, will put it after testing
         waterRelayState = HIGH;
