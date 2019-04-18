@@ -35,7 +35,7 @@ void setup() {
   pinMode(LedPin, OUTPUT); 
   pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
   
-  thing["led"] << [](pson & in) {
+  thing["light"] << [](pson & in) {
     if(autoMode==0){
       bool f = in["value"];
       if(f==1)ledState=HIGH;
@@ -44,18 +44,33 @@ void setup() {
     }
   };
 
-
   thing["auto"] << [](pson & in) {
     bool f = in["value"];
     autoMode = f;
   };
+
+  thing["qw"] << [](pson & in) {
+    bool f = in["qw"];
+    if(qw==1)waterRelayState = HIGH;
+    else waterRelayState = LOW;
+    digitalWrite(WaterRelayPin, waterRelayState);
+  };
   
-  thing["water"] << [](pson & in) {
+  thing["water"] = []() {
     if(autoMode==0){
-      bool f = in["value"];
-      if(f==1)waterRelayState=HIGH;
-      else waterRelayState=LOW;
-      digitalWrite(WaterRelayPin, waterRelayState);
+      double SoilMoistureSensorValue = map(analogRead(SoilMoistureSensorPin), 0, 1023, 0, 100);
+      if(SoilMoistureSensorValue>80){         // 80% or some other value, will put it after testing
+        waterRelayState = HIGH;
+        digitalWrite(WaterRelayPin, waterRelayState);
+      }
+      while(1){
+        SoilMoistureSensorValue = map(analogRead(SoilMoistureSensorPin), 0, 1023, 0, 100);
+        if(SoilMoistureSensorValue<65){         // 40% or some other value, will put it after testing
+          waterRelayState = LOW;
+          digitalWrite(WaterRelayPin, waterRelayState);
+          break;
+        }
+      }
     }
   };
   
@@ -71,32 +86,35 @@ void setup() {
     out["moisture"] = map(analogRead(SoilMoistureSensorPin), 0, 1023, 0, 100);
   };
   thing["reset"] = [](){
-    waterRelayState=HIGH;
-    ledState=HIGH;
+    waterRelayState=LOW;
+    digitalWrite(WaterRelayPin, waterRelayState);
+    ledState=LOW;
+    digitalWrite(LedPin, ledState);
     autoMode = 0;
   };
 }
 
 void loop() {
   if(autoMode==1){
-    while(1){
-      int temp = dht.readTemperature();
-      if(temp<25){
-        ledState = HIGH;
-        break;
-      }
-      digitalWrite(LedPin, LOW);
-      delay(100);
-      digitalWrite(LedPin, HIGH);
-      delay(200);
-      continue;
-      double SoilMoistureSensorValue = map(analogRead(SoilMoistureSensorPin), 0, 1023, 0, 100);
-      if(SoilMoistureSensorValue>40){         // 40% or someother value, will put it after testing
-        waterRelayState = HIGH;
+    double SoilMoistureSensorValue = map(analogRead(SoilMoistureSensorPin), 0, 1023, 0, 100);
+      if(SoilMoistureSensorValue>80){         // 40% or some other value, will put it after testing
+       waterRelayState = HIGH;
+       digitalWrite(WaterRelayPin, waterRelayState);
+     }
+     while(1){
+      SoilMoistureSensorValue = map(analogRead(SoilMoistureSensorPin), 0, 1023, 0, 100);
+      if(SoilMoistureSensorValue<65){         // 40% or some other value, will put it after testing
+        waterRelayState = LOW;
         digitalWrite(WaterRelayPin, waterRelayState);
         break;
       }
     }
   }
+  waterRelayState = HIGH;
+  digitalWrite(WaterRelayPin, waterRelayState);
+  delay(2000);
+  waterRelayState = LOW;
+  digitalWrite(WaterRelayPin, waterRelayState);
+  delay(2000);
   thing.handle();
 }
