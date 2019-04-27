@@ -15,9 +15,11 @@
       <button class="btn btn-outline-info" id='btnGiveCommand'>Give Command!</button>
       <button class="btn btn-outline-info" id='stop'>Stop!</button>
       <span id='message'></span>
+      <span id='label'>0</span>
     </div>
 <script>
     var message = document.querySelector('#message');
+    var label = 0;
     var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
     var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
     var grammar = '#JSGF V1.0;'
@@ -26,27 +28,53 @@
     speechRecognitionList.addFromString(grammar, 1);
     recognition.grammars = speechRecognitionList;
     recognition.lang = 'en-US';
+
+    var text = "*";
     var flag = false;
     recognition.interimResults = false;
+
+    function speaknow(){
+      var speech = new SpeechSynthesisUtterance();
+      speech.rate = .7;
+      speech.pitch = -2;
+      speech.volume = 1;
+      speech.voice = speechSynthesis.getVoices()[0];
+      speech.text = text;
+      speechSynthesis.speak(speech);
+    };
+
+    var f = 1;
     recognition.onresult = function(event) {
+        if(f == 0)return;
         var last = event.results.length - 1;
         var command = event.results[last][0].transcript;
         message.textContent = 'Voice Input: ' + command + '.';
+        if (f == 0)return;
         $.ajax({
           url: '/record/',
-          data: {
-            'message': command
+          data:{
+          'message': command,
+          'type': 'speak'
           },
           dataType: 'json',
-          success: function (data) {}
+          success: function (data) {
+            f = 0;
+            if(data.text!="*"){
+              text = data.text;
+              speaknow(text);
+              for (var i=0;i<1000;i+=1);
+            }
+          }
         });
         if (command.toLowerCase() === 'stop'){
           flag = false;
           recognition.stop();
         }
     };
+
     recognition.onend = function(){
       if(flag === true)recognition.start();
+      if(flag === true)f = 1;
     }
     recognition.onerror = function(event) {
       if (event.error != "no-speech")message.textContent = 'Error occurred in recognition: ' + event.error;
@@ -59,5 +87,6 @@
       flag = false;
       recognition.stop();
     });
+
 </script>
 {% endblock content %}

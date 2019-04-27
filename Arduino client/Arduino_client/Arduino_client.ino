@@ -3,12 +3,12 @@
 #include <ThingerESP8266.h>
 #include <DHT.h>
 
-#define USERNAME "New_Horizons"
+#define USERNAME "Karam_dar25"
 #define DEVICE_ID "greenhouse"
 #define DEVICE_CREDENTIAL "greenhouse"
 
-#define SSID "ACM LAB"
-#define SSID_PASSWORD "acm14acm"
+#define SSID "Karam_D-Link"
+#define SSID_PASSWORD "264961711#"
 
 ThingerESP8266 thing (USERNAME, DEVICE_ID, DEVICE_CREDENTIAL);
 
@@ -51,7 +51,7 @@ void setup() {
 
   thing["qw"] << [](pson & in) {
     bool f = in["qw"];
-    if(qw==1)waterRelayState = HIGH;
+    if(f==1)waterRelayState = HIGH;
     else waterRelayState = LOW;
     digitalWrite(WaterRelayPin, waterRelayState);
   };
@@ -109,12 +109,6 @@ void loop() {
         break;
       }
     }
-  }
-  waterRelayState = HIGH;
-  digitalWrite(WaterRelayPin, waterRelayState);
-  delay(2000);
-  waterRelayState = LOW;
-  digitalWrite(WaterRelayPin, waterRelayState);
-  delay(2000);
+  }      
   thing.handle();
 }

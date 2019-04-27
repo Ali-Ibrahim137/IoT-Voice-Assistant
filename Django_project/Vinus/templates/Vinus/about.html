@@ -6,4 +6,36 @@
        as a graduation project to obtain a bachelor degree in
       communication engineering from Tishreen Univercity Syria.
     </p>
+    <div class="container">
+
+      <h3>Text to Speech Converter</h3>
+
+      <textarea rows="" class="form-control" id="text" cols="" placeholder="Paste some text here..."></textarea>
+      <br>
+
+      <button type="button" class="btn btn-primary btn-lg" id="speak">Speak</button>
+
+    </div>
+
+    <script>
+
+      var text = document.querySelector('#text');
+      var speak = document.querySelector('#speak');
+
+      function speaknow () {
+        var speech = new SpeechSynthesisUtterance();
+        speech.rate = .7;
+        speech.pitch = -2;
+        speech.volume = 1;
+        speech.voice =speechSynthesis.getVoices()[0];
+        speech.text = text.value;
+
+        speechSynthesis.speak(speech);
+      }
+
+      speak.onclick = function (e) {
+        e.preventDefault();
+        speaknow();
+      };
+    </script>
 {% endblock content %}

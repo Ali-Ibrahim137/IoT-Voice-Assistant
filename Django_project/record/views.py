@@ -27,26 +27,33 @@ Global_token = ""
 
 @login_required
 def record(request):
+    type = request.GET.get('type', None)
     text = request.GET.get('message', None)
     text = str(text)
     text = text.lower()
     tokenize = nltk.word_tokenize(text)
-    if len(tokenize) !=0 and tokenize[0]!='none':
+    if (len(tokenize) !=0 and tokenize[0]!='none') or type=="speak":
         form = Record()
-        return ParseText.Handle(tokenize, text, form, request)
+        return ParseText.Handle(tokenize, text, form, type, request)
     if request.method == 'POST':
         form = Record(request.POST)
         if form.is_valid():
             text = form.cleaned_data.get('text')
             form = Record()
             text = text.lower()
-            print('text is ', text)
             tokenize = nltk.word_tokenize(text)
-            return ParseText.Handle(tokenize, text, form, request)
+            return ParseText.Handle(tokenize, text, form, "text",request)
     else:
         form = Record()
     return render(request, 'record/record.html', {'form': form})
 
+
+def speak(text, type = 0):
+    data = {
+        'text': text,
+        'type': type
+    }
+    return JsonResponse(data)
 
 def editDistDP(str1, str2, m, n):
     dp = [[0 for x in range(n+1)] for x in range(m+1)]
@@ -136,7 +143,7 @@ class ParseText:
             return "*"
 
     @classmethod
-    def Handle(cls, tokenize, text ,form, request):
+    def Handle(cls, tokenize, text , form, type ,request):
         global other, Global_thinger_username, Global_device_name, Global_thinger_api_name, Global_resources_name, Global_token
         f = 0;
         for i in tokenize:
@@ -144,7 +151,10 @@ class ParseText:
             if editDistDP(i, 'vinus', len(i), 5) <= 3:
                 f = 1
         if f == 0:
+            if type =='speak':
+                return speak("*")
             return render(request, 'record/record.html', {'form': form})
+
         devices = ParseText.get_device_name(tokenize, request.user)
         user_devices = Device.objects.filter(user = request.user)
         if len(devices) == 0 and other == 1:
@@ -162,15 +172,21 @@ class ParseText:
             Global_thinger_api_name = ""
             Global_resources_name = ""
             Global_token = ""
+            if type =='speak':
+                return speak("the command has been executed")
             messages.warning(request, 'Other data was sent !')
             return render(request, 'record/record.html', {'form': form})
 
         other = 0
         if len(devices) == 0 and len(user_devices) !=1:
+            if type =='speak':
+                return speak("incomplete command")
             messages.warning(request, 'No device name was recognized')
             return render(request, 'record/record.html', {'form': form})
 
         if len(devices) > 1 and len(user_devices) !=1:
+            if type =='speak':
+                return speak("incomplete command")
             messages.warning(request, 'More than one device recognized')
             return render(request, 'record/record.html', {'form': form})
         if len(devices) == 1:
@@ -181,11 +197,15 @@ class ParseText:
                                                           device.device_name,
                                                           device.token)
         if is_connected == -2:
+            if type =='speak':
+                return speak("unauthorized")
             messages.warning(request, 'UNAUTHORIZED')
             return render(request, 'record/record.html', {'form': form})
         if is_connected == 0:
             device.is_connected = False
             device.save()
+            if type =='speak':
+                return speak("device not connected")
             messages.warning(request, 'Device not connected')
             return render(request, 'record/record.html', {'form': form})
         device.is_connected = True
@@ -195,11 +215,15 @@ class ParseText:
         apis = ParseText.get_thinger_api(tokenize, device)
         Apis = THINGER_API.objects.filter(device = device)
         if len(apis) == 0 and len(Apis)!=2:
+            if type =='speak':
+                return speak("incomplete command")
             messages.warning(request, 'No Api name was recognized')
             return render(request, 'record/record.html', {'form': form})
         if len(apis) > 1 and len(Apis)!=2:
-            messages.warning(request, 'More than one Api name recognized')
+            if type =='speak':
+                return speak("incomplete command")
             return render(request, 'record/record.html', {'form': form})
+            messages.warning(request, 'More than one Api name recognized')
         if len(apis) == 1:
             api = apis.pop()
         else:
@@ -228,14 +252,23 @@ class ParseText:
                 Global_thinger_api_name = thinger_api_name
                 Global_resources_name = res.resources_name
                 Global_token = token
+                if type =='speak':
+                    return speak("What is the " + res.resources_name, 1)
+                messages.warning(request, 'More than one Api name recognized')
                 return render(request, 'record/record.html', {'form': form})
             if data == "INVALID":
+                if type =='speak':
+                    return speak("incomplete command")
                 messages.warning(request, 'No data was extracted!')
                 return render(request, 'record/record.html', {'form': form})
+
             resources_name = res.resources_name
             value = data
             ConnectWithThinger.send_to_thinger(thinger_username, device_name, thinger_api_name,
                                                resources_name, value, token, res.data_type)
+            if type =='speak':
+                return speak("the command has been executed")
+
             return render(request, 'record/record.html', {'form': form})
         if api.type == Output_API:
             # output api
@@ -244,12 +277,16 @@ class ParseText:
             resources_name = res.resources_name
             value = ConnectWithThinger.get_from_thinger(thinger_username, device_name,
                                                         thinger_api_name, resources_name ,token)
+            if type =='speak':
+                return speak("the value of " + thinger_api_name + " is " + str(value))
             messages.success(request, 'The value of ' + thinger_api_name + ' is ' + str(value))
             return render(request, 'record/record.html', {'form': form})
         if api.type == No_Parameters_API:
             # no parameters api
             # Send a request to thinger to execute this api
             ConnectWithThinger.execute_no_par(thinger_username, device_name, thinger_api_name, token)
+            if type =='speak':
+                return speak("the command has been executed")
             return render(request, 'record/record.html', {'form': form})
         if api.type == Input_Outpur_API:
             # input output API
@@ -258,12 +295,16 @@ class ParseText:
             in_res = Resources.objects.get(thinger_api = api, type = 2)     # 2 is input res
             data = ParseText.get_data(text, in_res.data_type, request, form)
             if data == "INVALID":
+                if type =='speak':
+                    return speak("incomplete command")
                 messages.warning(request, 'No data was extracted!')
                 return render(request, 'record/record.html', {'form': form})
             value = data
             out_res = Resources.objects.get(thinger_api = api, type = 1)     # 1 is output res
             value = ConnectWithThinger.send_get(thinger_username, device_name, in_res, data, out_res, thinger_api_name, token, in_res.data_type)
             messages.success(request, 'The value of ' + out_res.resources_name + ' is ' + str(value))
+            if type =='speak':
+                return speak("the value of " + out_res.resources_name + " is " + str(value))
             return render(request, 'record/record.html', {'form': form})
 
 
