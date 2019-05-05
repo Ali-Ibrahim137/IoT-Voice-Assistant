@@ -7,17 +7,17 @@
 #define DEVICE_ID "greenhouse"
 #define DEVICE_CREDENTIAL "greenhouse"
 
-#define SSID "Karam_D-Link"
-#define SSID_PASSWORD "264961711#"
+#define SSID "****"
+#define SSID_PASSWORD "****"
 
 ThingerESP8266 thing (USERNAME, DEVICE_ID, DEVICE_CREDENTIAL);
 
 
-const int WaterRelayPin = 5;
-const int LedPin = 4;
+const int WaterRelayPin = 12; 			//D6
+const int LedPin = 4; 				//D2
 
-const int SoilMoistureSensorPin = 17;
-const int DhtSensorPin = 0;
+const int SoilMoistureSensorPin = 14; 		//D5
+const int DhtSensorPin = 13; 			//D3
 
 const int DhtType = DHT22;
 
@@ -33,7 +33,7 @@ void setup() {
   thing.add_wifi(SSID, SSID_PASSWORD);
   pinMode(WaterRelayPin, OUTPUT);
   pinMode(LedPin, OUTPUT); 
-  pinMode(LED_BUILTIN, OUTPUT);     // Initialize the LED_BUILTIN pin as an output
+  pinMode(SoilMoistureSensorPin, INPUT);
   
   thing["light"] << [](pson & in) {
     if(autoMode==0){
@@ -58,19 +58,17 @@ void setup() {
   
   thing["water"] = []() {
     if(autoMode==0){
-      double SoilMoistureSensorValue = map(analogRead(SoilMoistureSensorPin), 0, 1023, 0, 100);
-      if(SoilMoistureSensorValue>80){         // 80% or some other value, will put it after testing
+      bool SoilMoistureSensorValue = digitalRead(SoilMoistureSensorPin);
+      if(digitalRead(SoilMoistureSensorPin)==HIGH){
         waterRelayState = HIGH;
         digitalWrite(WaterRelayPin, waterRelayState);
-      }
-      while(1){
-        SoilMoistureSensorValue = map(analogRead(SoilMoistureSensorPin), 0, 1023, 0, 100);
-        if(SoilMoistureSensorValue<65){         // 40% or some other value, will put it after testing
-          waterRelayState = LOW;
-          digitalWrite(WaterRelayPin, waterRelayState);
-          break;
+        while(digitalRead(SoilMoistureSensorPin)==HIGH){
+          ESP.wdtFeed();
+          SoilMoistureSensorValue = digitalRead(SoilMoistureSensorPin);
         }
       }
+      waterRelayState = LOW;
+      digitalWrite(WaterRelayPin, waterRelayState);       
     }
   };
   
@@ -83,7 +81,7 @@ void setup() {
   };
 
   thing["moisture"] >> [](pson & out) {
-    out["moisture"] = map(analogRead(SoilMoistureSensorPin), 0, 1023, 0, 100);
+    out["moisture"] = digitalRead(SoilMoistureSensorPin);
   };
   thing["reset"] = [](){
     waterRelayState=LOW;
@@ -96,19 +94,17 @@ void setup() {
 
 void loop() {
   if(autoMode==1){
-    double SoilMoistureSensorValue = map(analogRead(SoilMoistureSensorPin), 0, 1023, 0, 100);
-      if(SoilMoistureSensorValue>80){         // 40% or some other value, will put it after testing
-       waterRelayState = HIGH;
-       digitalWrite(WaterRelayPin, waterRelayState);
-     }
-     while(1){
-      SoilMoistureSensorValue = map(analogRead(SoilMoistureSensorPin), 0, 1023, 0, 100);
-      if(SoilMoistureSensorValue<65){         // 40% or some other value, will put it after testing
-        waterRelayState = LOW;
+      bool SoilMoistureSensorValue = digitalRead(SoilMoistureSensorPin);
+      if(digitalRead(SoilMoistureSensorPin)==HIGH){
+        waterRelayState = HIGH;
         digitalWrite(WaterRelayPin, waterRelayState);
-        break;
+        while(digitalRead(SoilMoistureSensorPin)==HIGH){
+          ESP.wdtFeed();
+          SoilMoistureSensorValue = digitalRead(SoilMoistureSensorPin);
+        }
       }
+      waterRelayState = LOW;
+      digitalWrite(WaterRelayPin, waterRelayState);       
     }
-  }      
   thing.handle();
-}
+} 
