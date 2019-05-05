@@ -22,19 +22,86 @@
 // THE SOFTWARE.
 
 #include "thinger/thinger.h"
-
-#define USER_ID             "qwerty"
-#define DEVICE_ID           "qwerty"
+#include <string>
+#include "SDL.h"
+#include "SDL_mixer.h"
+#define USER_ID             "New_Horizons"
+#define DEVICE_ID           "music"
 #define DEVICE_CREDENTIAL   "qwerty"
+using namespace std;
+Mix_Music *music = NULL;
+int voulme = 64;
+bool fst = 1;
+bool init(){
+    int x =Mix_OpenAudio( 22050, MIX_DEFAULT_FORMAT, 2, 4096 );
+    if( x == -1 ){
+        return false;
+    }
+    return true;
+}
 
-int main(int argc, char *argv[])
-{
+bool load_files(string str){
+    //Load the music
+    music = Mix_LoadMUS(str.c_str());
+
+    //If there was a problem loading the music
+    if( music == NULL ){
+        return false;
+    }
+    return true;
+}
+void clean_up(){
+    //Free the music
+    Mix_FreeMusic( music );
+    //Quit SDL_mixer
+    Mix_CloseAudio();
+    //Quit SDL
+    SDL_Quit();
+}
+
+
+int main(int argc, char *argv[]){
     thinger_device thing(USER_ID, DEVICE_ID, DEVICE_CREDENTIAL);
 
-    // define thing resources here. i.e, this is a sum example
-    thing["start"] = [](){
-	int x = system("mplayer 1.mp3");
+    if(init()==0){
+      // cout<<"Wrong in init "<<endl;
+      return -9;
+    }
+
+    thing["pause"] = []() {
+	cout<<"pausing the song "<<endl;
+	Mix_PauseMusic();
     };
+    thing["stop"] = []() {
+	cout<<"stoping the song "<<endl;
+	Mix_HaltMusic();
+    };
+    thing["resume"] = [] (){
+	cout<<"resuming the song "<<endl;
+      if( Mix_PausedMusic() == 1 ){          //If the music is paused
+          //Resume the music
+          Mix_ResumeMusic();
+      }
+    };
+    thing["volume"] << [](pson& in){
+      voulme = (int) in["v"];
+      if(fst == 1){
+	voulme = 64;
+	fst = 0;
+      }
+      cout<<"changing the volume to "<<voulme<<endl;
+      Mix_VolumeMusic(voulme);
+    };
+    thing["play"] << [](pson& in){
+      string song = in["song"];
+	song+=".mp3";
+      cout<<"song is "<<song<<endl;
+      if(load_files(song)!=0){
+        Mix_PlayMusic( music, -1 );
+      }
+    };
+
+    thing["api"] = [](pson& in, pson& out){};
     thing.start();
     return 0;
 }

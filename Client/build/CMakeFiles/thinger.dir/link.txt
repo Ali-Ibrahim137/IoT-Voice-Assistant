@@ -1,1 +1,0 @@
-/usr/bin/c++   -std=c++11 -O3 -DNDEBUG  -rdynamic CMakeFiles/thinger.dir/src/main.cpp.o  -o thinger -lssl -lcrypto 

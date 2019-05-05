@@ -15,11 +15,9 @@
       <button class="btn btn-outline-info" id='btnGiveCommand'>Give Command!</button>
       <button class="btn btn-outline-info" id='stop'>Stop!</button>
       <span id='message'></span>
-      <span id='label'>0</span>
     </div>
 <script>
     var message = document.querySelector('#message');
-    var label = 0;
     var SpeechRecognition = SpeechRecognition || webkitSpeechRecognition;
     var SpeechGrammarList = SpeechGrammarList || webkitSpeechGrammarList;
     var grammar = '#JSGF V1.0;'
@@ -44,12 +42,14 @@
     };
 
     var f = 1;
-    recognition.onresult = function(event) {
-        if(f == 0)return;
+    recognition.onresult = function(event){
+        if (f == 0){
+          f = 1;
+          return;
+        }
         var last = event.results.length - 1;
         var command = event.results[last][0].transcript;
         message.textContent = 'Voice Input: ' + command + '.';
-        if (f == 0)return;
         $.ajax({
           url: '/record/',
           data:{
@@ -58,11 +58,10 @@
           },
           dataType: 'json',
           success: function (data) {
-            f = 0;
             if(data.text!="*"){
+              f = 0;
               text = data.text;
               speaknow(text);
-              for (var i=0;i<1000;i+=1);
             }
           }
         });
@@ -74,7 +73,6 @@
 
     recognition.onend = function(){
       if(flag === true)recognition.start();
-      if(flag === true)f = 1;
     }
     recognition.onerror = function(event) {
       if (event.error != "no-speech")message.textContent = 'Error occurred in recognition: ' + event.error;

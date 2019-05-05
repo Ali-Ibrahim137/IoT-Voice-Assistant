@@ -3,6 +3,8 @@ project(thinger)
 
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 
+
+include_directories(/usr/include/SDL2)
 # check c++11 support
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
@@ -73,6 +75,7 @@ if(DAEMON)
     endif()
 else()
     add_executable(thinger ${SOURCE_FILES})
+    target_link_libraries(thinger "-lSDL2 -lSDL2_mixer")
     target_link_libraries(thinger ${ADDITIONAL_LIBS})
     set_target_properties(thinger PROPERTIES COMPILE_DEFINITIONS "DAEMON=0")
 endif()

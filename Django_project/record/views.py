@@ -150,6 +150,9 @@ class ParseText:
             i = i.lower()
             if editDistDP(i, 'vinus', len(i), 5) <= 3:
                 f = 1
+            if editDistDP(i, 'okay', len(i), 4) <= 2:
+                f = 1
+
         if f == 0:
             if type =='speak':
                 return speak("*")

@@ -1,3 +1,0 @@
-/home/ali-ibrahim/GitHub/Linux-client/Linux-Client/build/CMakeFiles/rebuild_cache.dir
-/home/ali-ibrahim/GitHub/Linux-client/Linux-Client/build/CMakeFiles/thinger.dir
-/home/ali-ibrahim/GitHub/Linux-client/Linux-Client/build/CMakeFiles/edit_cache.dir
