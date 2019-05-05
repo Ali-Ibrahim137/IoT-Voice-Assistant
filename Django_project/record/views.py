@@ -115,6 +115,19 @@ class ParseText:
             if len(nums)==1:
                 num = nums[0]
                 return num
+            tokenize = nltk.word_tokenize(data)
+            ret = 0
+            for word in tokenize:
+                x = WordsToNumbers.parse(word)
+                if x!=0:
+                    num = x
+                    return num
+                print(word)
+                if word=="to":
+                    ret = 2
+            if ret!=0:
+                return ret
+            # HERE use the words to WordsToNumbers
             return "INVALID"
         if data_type == Double_Data:
             nums = re.findall(r"[+-]?\d+(?:\.\d+)?",data)
@@ -353,33 +366,36 @@ class WordsToNumbers():
         r'((?:%s))(?:\s(.*)|$)' %
         ('|'.join(__tens__.keys()))
         )
-
-    def parse(self, words):
+    @classmethod
+    def parse(cls , words):
         words = words.lower()
         groups = {}
         num = 0
-        for group in WordsToNumbers.__groups_re__.findall(words):
-            group_multiplier = 1
-            if group[1] in WordsToNumbers.__groups__:
-                group_multiplier = WordsToNumbers.__groups__[group[1]]
-            group_num = 0
-            hundreds_match = WordsToNumbers.__hundreds_re__.match(group[0])
-            tens_and_ones = None
-            if hundreds_match is not None and hundreds_match.group(1) is not None:
-                group_num = group_num + \
-                            (WordsToNumbers.__ones__[hundreds_match.group(1)] * 100)
-                tens_and_ones = hundreds_match.group(2)
-            else:
-                tens_and_ones = group[0]
-            if tens_and_ones is None:
+        try:
+            for group in WordsToNumbers.__groups_re__.findall(words):
+                group_multiplier = 1
+                if group[1] in WordsToNumbers.__groups__:
+                    group_multiplier = WordsToNumbers.__groups__[group[1]]
+                group_num = 0
+                hundreds_match = WordsToNumbers.__hundreds_re__.match(group[0])
+                tens_and_ones = None
+                if hundreds_match is not None and hundreds_match.group(1) is not None:
+                    group_num = group_num + \
+                                (WordsToNumbers.__ones__[hundreds_match.group(1)] * 100)
+                    tens_and_ones = hundreds_match.group(2)
+                else:
+                    tens_and_ones = group[0]
+                if tens_and_ones is None:
+                    num = num + (group_num * group_multiplier)
+                    continue
+                tn1_match = WordsToNumbers.__tens_and_ones_re__.match(tens_and_ones)
+                if tn1_match is not None:
+                    group_num = group_num + WordsToNumbers.__tens__[tn1_match.group(1)]
+                    if tn1_match.group(2) is not None:
+                        group_num = group_num + WordsToNumbers.__ones__[tn1_match.group(2)]
+                else:
+                    group_num = group_num + WordsToNumbers.__ones__[tens_and_ones]
                 num = num + (group_num * group_multiplier)
-                continue
-            tn1_match = WordsToNumbers.__tens_and_ones_re__.match(tens_and_ones)
-            if tn1_match is not None:
-                group_num = group_num + WordsToNumbers.__tens__[tn1_match.group(1)]
-                if tn1_match.group(2) is not None:
-                    group_num = group_num + WordsToNumbers.__ones__[tn1_match.group(2)]
-            else:
-                group_num = group_num + WordsToNumbers.__ones__[tens_and_ones]
-            num = num + (group_num * group_multiplier)
+        except:
+            return 0
         return num
