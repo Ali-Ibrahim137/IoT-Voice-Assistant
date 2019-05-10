@@ -81,7 +81,7 @@ void setup() {
   };
 
   thing["moisture"] >> [](pson & out) {
-    out["moisture"] = digitalRead(SoilMoistureSensorPin);
+    out["moisture"] = map(analogRead(SoilMoistureSensorPin), 0, 1023, 0, 100);
   };
   thing["reset"] = [](){
     waterRelayState=LOW;
