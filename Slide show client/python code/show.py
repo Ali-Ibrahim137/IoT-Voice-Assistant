@@ -16,7 +16,7 @@ im1 = PhotoImage(file='1.png')
 im2 = PhotoImage(file='2.png')
 im3 = PhotoImage(file='3.png')
 images = [im0, im1, im2, im3]
-frame.pack()
+frame.pack(fill='both', expand=False)
 fst = 1
 d = "00"
 def get():
