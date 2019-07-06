@@ -45,7 +45,6 @@
               </div>
               <div class="navbar-nav">
                 {% if user.is_authenticated %}
-                  <button id ="Refresh" class="nav-item nav-link btn btn-link" type="button">Refresh</button>
                   <div class="dropdown">
                       <button class="btn btn-link nav-item nav-link dropdown-toggle" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                       Add
@@ -56,6 +55,8 @@
                       <a class="dropdown-item form-group media-body" href="{% url 'res-create' %}">New Resource</a>
                     </div>
                   </div>
+                  <a class="nav-item nav-link" href="{% url 'record'%}">Record</a>
+                  <button id ="Refresh" class="nav-item nav-link btn btn-link" type="button">Refresh</button>
                   <a class="nav-item nav-link" href="{% url 'profile'%}">{{ user.username }}</a>
                   <a class="nav-item nav-link" href="{% url 'logout' %}">Logout</a>
                 {% else %}

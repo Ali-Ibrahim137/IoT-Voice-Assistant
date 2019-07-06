@@ -145,12 +145,18 @@ class ParseText:
                     turn_on = 1
                 if tokenize[i-1] + ' ' + tokenize [i] == "turn off":
                     turn_off = 1
-            if turn_on == turn_off:
+            if turn_on == turn_off and turn_on == True:
                 return "INVALID"
             if turn_on == 1:
                 return 1
             if turn_off == 1:
                 return 0
+            for token in tokenize:
+                if token=="on":
+                    return 1
+                if token=="off":
+                    return 0
+            return "INVALID"
         # data_type = other     will be handled later
         if data_type == Other_Data:
             return "*"
