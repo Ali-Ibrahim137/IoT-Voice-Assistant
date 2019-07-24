@@ -339,6 +339,7 @@ class ConnectWithThinger:
             url =  URL + "/v1/users/" + thinger_username + "/devices"
             payload = ""
             headers = {'authorization': 'Bearer '+ token}
+            print(token)
             response = requests.request("GET", url, data=payload, headers=headers)
             response = response.text
             res = json.loads(response)
@@ -347,6 +348,7 @@ class ConnectWithThinger:
                     return device["connection"]["active"]
             return -1
         except Exception as e:
+            print(e)
             return -2
     @classmethod
     def get_api_exists(cls, thinger_username, device_name, token, thinger_api_name):
@@ -354,6 +356,7 @@ class ConnectWithThinger:
             url = URL + "/v2/users/"+thinger_username + '/devices/'+device_name + '/api'
             payload = ""
             headers = {'authorization': 'Bearer '+ token}
+            print(token)
             response = requests.request("GET", url, data=payload, headers=headers)
             response = response.text
             res = json.loads(response)
@@ -362,6 +365,7 @@ class ConnectWithThinger:
                     return True
             return False
         except Exception as e:
+            print(e)
             return -1
 
     @classmethod
